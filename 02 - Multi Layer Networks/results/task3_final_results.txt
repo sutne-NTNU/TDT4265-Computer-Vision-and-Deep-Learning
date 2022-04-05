@@ -1,0 +1,7 @@
+
+|    |Train Loss | Validation Loss | Train Accuracy | Validation Accuracy |
+|:-- |:--        |:--              |:--             |:--                  |
+|No Improvements|0.0765|0.2978|98.370%|91.520%|
+|Improved Weight Initialization|0.0131|0.1366|99.960%|95.940%|
+|Improved Sigmoid|0.0991|0.3954|97.590%|89.910%|
+|Using Momentum|0.0621|0.2955|98.665%|91.910%|

@@ -1,0 +1,4 @@
+
+|    |Train Loss | Validation Loss | Train Accuracy | Validation Accuracy |
+|:-- |:--        |:--              |:--             |:--                  |
+|Hidden Layer With 64 Neurons|0.0765|0.2978|98.370%|91.520%|

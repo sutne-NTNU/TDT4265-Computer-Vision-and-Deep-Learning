@@ -1,0 +1,15 @@
+# Folders
+**.vscode/
+**__pycache__/
+**data/
+**checkpoints/
+**temp/
+
+# Filetypes
+**.zip
+**.html
+
+# Specific files
+**create_submission_zip.py
+**temp.*
+**.DS_Store
