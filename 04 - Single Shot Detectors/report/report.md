@@ -167,6 +167,8 @@ They use different bounding box aspect ratios at the same spatial location becau
 
 The main difference between *SSD* and *YOLO* is that the *YOLO* architecture consists of fully connected layers while *SSD* only consists of CNN layers. This means that *SSD* is able to classify the same objects at different sizes, while *YOLO* only can classify objects of a certain size.
 
+*SSD predicts bounding boxes from several feature maps from the backbone network. YOLO V1/v2 does not do this.*
+
 ![A comparison between SSD and YOLO network architecture[^2]](images/yolo-ssd.png){width=70%}
 
 [^2]: [SSD: Single Shot MultiBox Detector.][2]
