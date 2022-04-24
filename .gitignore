@@ -1,7 +1,6 @@
 # Folders
 **.vscode/
 **__pycache__/
-**data/
 **checkpoints/
 **temp/
 
