@@ -1,0 +1,16 @@
+# Folders
+*.vscode/
+*__pycache__/
+*.cache/
+*logs/
+
+# Filetypes
+*.png
+*.jpg
+*.jpeg
+*.m4a
+*.mkv
+*.mp4
+
+# Files
+*.DS_Store
