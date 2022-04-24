@@ -1,5 +1,3 @@
-from tqdm import tqdm
-
 from utils.config import instantiate, LazyConfig
 from utils import utils
 
@@ -18,13 +16,12 @@ def get_dataloader(cfg, dataset_to_visualize):
 
 
 def analyze_dataloader(config, dataset_name):
-    print(f"\nAnalyzing Dataset: {dataset_name}")
     dataloader = get_dataloader(config, dataset_name)
 
     labels = {}
-    aspectRatios = {}  # Height / Width
+    aspectRatios = {}  # Width / Height
 
-    for batch in tqdm(dataloader):
+    for batch in utils.progress_bar(dataloader, f"Analyzing Dataset: {dataset_name}"):
         # Batch Contains:
         #   'image'     - image data
         #   'image_id'  - id of image (number)
@@ -32,35 +29,37 @@ def analyze_dataloader(config, dataset_name):
         #   'height'    - height of image
         #   'labels'    - labels for the current image
         #   'boxes'     - boxes corresponsing to the labels
-        image_width, image_height = int(batch["width"]), int(batch["height"])
+        image_width = float(batch["width"])
+        image_height = float(batch["height"])
 
         for image_labels, image_boxes in zip(batch["labels"], batch["boxes"]):
             for label, box in zip(image_labels, image_boxes):
-                idx = int(label)
+                i = int(label)
 
                 # Increase counter for number of label occurrences
-                if idx not in labels:
-                    labels[idx] = 1
+                if i not in labels:
+                    labels[i] = 1
                 else:
-                    labels[idx] = labels[idx] + 1
+                    labels[i] = labels[i] + 1
 
                 # find aspect ratio of box and add it to dict list
                 x_min, y_min, x_max, y_max = box
                 width = (x_max - x_min)*image_width
                 height = (y_max - y_min)*image_height
                 aspectRatio = width/height
-                if idx not in aspectRatios:
-                    aspectRatios[idx] = [aspectRatio]
+
+                if i not in aspectRatios:
+                    aspectRatios[i] = [aspectRatio]
                 else:
-                    aspectRatios[idx].append(aspectRatio)
+                    aspectRatios[i].append(aspectRatio)
 
     # Print Results for each label
-    for idx in sorted(labels.keys()):
+    for i in sorted(labels.keys()):
         # Calculate average
-        averageAspectRatio = sum(aspectRatios[idx]) / len(aspectRatios[idx])
+        averageAspectRatio = sum(aspectRatios[i]) / len(aspectRatios[i])
 
         print(
-            f"{idx} {config.label_map[idx]}: Occurrences: {labels[idx]} Average Aspect Ratio: {averageAspectRatio}"
+            f"{i} {config.label_map[i]}: Occurrences: {labels[i]} Average Aspect Ratio: {averageAspectRatio}"
         )
 
 

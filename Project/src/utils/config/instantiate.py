@@ -3,6 +3,8 @@ import dataclasses
 import logging
 from collections import abc
 from typing import Any
+from omegaconf import ListConfig
+
 from .utils import _convert_target_to_string, locate
 
 __all__ = ["dump_dataclass", "instantiate"]
@@ -27,7 +29,8 @@ def dump_dataclass(obj: Any):
         if dataclasses.is_dataclass(v):
             v = dump_dataclass(v)
         if isinstance(v, (list, tuple)):
-            v = [dump_dataclass(x) if dataclasses.is_dataclass(x) else x for x in v]
+            v = [dump_dataclass(x) if dataclasses.is_dataclass(
+                x) else x for x in v]
         ret[f.name] = v
     return ret
 
@@ -44,7 +47,6 @@ def instantiate(cfg, **kwargs):
     Returns:
         object instantiated by cfg
     """
-    from omegaconf import ListConfig
 
     if isinstance(cfg, ListConfig):
         lst = [instantiate(x, **kwargs) for x in cfg]
@@ -71,7 +73,8 @@ def instantiate(cfg, **kwargs):
             except Exception:
                 # target could be anything, so the above could fail
                 cls_name = str(cls)
-        assert callable(cls), f"_target_ {cls} does not define a callable object"
+        assert callable(
+            cls), f"_target_ {cls} does not define a callable object"
         try:
             return cls(**cfg, **kwargs)
         except TypeError:

@@ -4,6 +4,7 @@ from pathlib import Path
 from os import PathLike
 import pathlib
 import getpass
+from tqdm import tqdm
 
 from .config import LazyConfig
 
@@ -66,3 +67,12 @@ def get_output_dir():
     if work_dir.is_dir() and save_in_work:
         return work_dir.joinpath("ssd_outputs")
     return pathlib.Path("../outputs")
+
+
+def progress_bar(iterable, desc=""):
+    progress = tqdm(
+        iterable,
+        desc=desc,
+        bar_format='{desc} |{bar:50}| {elapsed} {n_fmt}/{total_fmt}',
+    )
+    return progress

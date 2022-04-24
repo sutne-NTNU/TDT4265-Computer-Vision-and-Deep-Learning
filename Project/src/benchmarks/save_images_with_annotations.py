@@ -1,11 +1,10 @@
 import cv2
 import os
-from tqdm import tqdm
 import numpy as np
 from vizer.draw import draw_boxes
 
 from utils.config import instantiate, LazyConfig
-import utils
+import utils.utils as utils
 
 
 def get_config(config_path):
@@ -81,7 +80,7 @@ def save_images_with_annotations(dataloader, cfg, save_folder, num_images_to_vis
     num_images_to_save = min(len(dataloader), num_images_to_visualize)
     dataloader = iter(dataloader)
 
-    for i in tqdm(range(num_images_to_save)):
+    for i in utils.progress_bar(range(num_images_to_save), f"Saving Images"):
         batch = next(dataloader)
         viz_image = create_viz_image(batch, cfg.label_map)
         filepath = create_filepath(save_folder, i)
@@ -89,12 +88,12 @@ def save_images_with_annotations(dataloader, cfg, save_folder, num_images_to_vis
 
 
 if __name__ == '__main__':
-    config_path = "configs/tdt4265.py"
+    config_path = "model/configs/tdt4265.py"
     cfg = get_config(config_path)
     dataset_to_visualize = "train"  # or "val"
-    num_images_to_visualize = 500  # Increase this if you want to save more images
+    num_images_to_visualize = 100  # Increase this if you want to save more images
 
     dataloader = get_dataloader(cfg, dataset_to_visualize)
-    save_folder = os.path.join(utils.get_output_folder(), "annotation_images")
+    save_folder = os.path.join(utils.get_output_dir(), "annotation_images")
     save_images_with_annotations(
         dataloader, cfg, save_folder, num_images_to_visualize)
