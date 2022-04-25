@@ -1,0 +1,3237 @@
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   ../Readme.md
+	deleted:    benchmarks/benchmark_data_loading.py
+	deleted:    benchmarks/dataset_exploration.py
+	deleted:    benchmarks/demo_video.py
+	deleted:    benchmarks/runtime_analysis.py
+	deleted:    benchmarks/save_comparison_images.py
+	deleted:    benchmarks/save_images_with_annotations.py
+	deleted:    benchmarks/save_validation_results.py
+	deleted:    data/__init__.py
+	deleted:    data/tdt4265_dataset.py
+	deleted:    data/transforms/__init__.py
+	deleted:    data/transforms/gpu_transforms.py
+	deleted:    data/transforms/target_transform.py
+	deleted:    data/transforms/transform.py
+	deleted:    model/configs/tdt4265.py
+	deleted:    model/configs/tdt4265_updated.py
+	deleted:    model/configs/test_anchors/base.py
+	deleted:    model/evaluate.py
+	deleted:    model/model.py
+	deleted:    model/modeling/__init__.py
+	deleted:    model/modeling/anchor_boxes.py
+	deleted:    model/modeling/anchor_encoder.py
+	deleted:    model/modeling/ssd.py
+	deleted:    model/modeling/ssd_multibox_loss.py
+	deleted:    model/tops/__init__.py
+	deleted:    model/tops/build.py
+	deleted:    model/tops/checkpointer.py
+	deleted:    model/tops/logger.py
+	deleted:    model/tops/misc.py
+	deleted:    model/train.py
+	deleted:    utils/__init__.py
+	deleted:    utils/box_utils.py
+	deleted:    utils/config/__init__.py
+	deleted:    utils/config/instantiate.py
+	deleted:    utils/config/lazy.py
+	deleted:    utils/config/utils.py
+	deleted:    utils/torch_utils.py
+	deleted:    utils/utils.py
+	modified:   ../tasks/1-1.sh
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	benchmark_data_loading.py
+	configs/
+	dataset_exploration.py
+	demo.py
+	outputs/
+	performance_assessment/
+	runtime_analysis.py
+	save_images_with_annotations.py
+	save_validation_results.py
+	ssd/
+	tops/
+	train.py
+	../tasks/2-1.sh
+
+no changes added to commit (use "git add" and/or "git commit -a")
+0025d7ed341fbcb74740ce9cf76e80771e225699
+diff --git a/Project/Readme.md b/Project/Readme.md
+index f8889e2..085f5d2 100644
+--- a/Project/Readme.md
++++ b/Project/Readme.md
+@@ -1,86 +1,3 @@
+-# SSD300
++# TDT4265 Project
+ 
+-
+-## Tutorials
+-- [Introduction to code](../notebooks/code_introduction.ipynb).
+-- [Dataset setup](tutorials/dataset_setup.md) (Not required for TDT4265 computers).
+-- [Running tensorboard to visualize graphs](tutorials/tensorboard.md).
+-
+-
+-## Install
+-Follow the installation instructions from previous assignments.
+-Then, install specific packages with
+-
+-```sh
+-pip install -r requirements.txt
+-```
+-
+-
+-## Dataset exploration
+-We have provided some boilerplate code for getting you started with dataset exploration. It can be found in `dataset_exploration/analyze_stuff.py`. We recommend making multiple copies of this file for different parts of your data exploration.
+-
+-To run the script, do the following command from the SSD folder:
+-
+-```sh
+-python -m dataset_exploration.analyze_stuff
+-```
+-
+-## Dataset visualization
+-
+-We have also created a script visualizing images with annotations. To run the script, do
+-
+-```sh
+-python -m dataset_exploration.save_images_with_annotations
+-```
+-
+-By default, the script will print the 500 first train images in the dataset, but it is possible to change this by changing the parameters in the `main` function in the script.
+-
+-## Qualitative performance assessment
+-
+-To check how the model is performing on real images, check out the `performance assessment` folder. Run the test script by doing:
+-
+-```sh
+-python -m performance_assessment.save_comparison_images <config_file>
+-```
+-
+-If you for example want to use the config file `configs/tdt4265.py`, the command becomes:
+-
+-```sh
+-python -m performance_assessment.save_comparison_images configs/tdt4265.py
+-```
+-
+-This script comes with several extra flags. If you for example want to check the output on the 500 first train images, you can run:
+-
+-```sh
+-python -m performance_assessment.save_comparison_images configs/tdt4265.py --train -n 1000
+-```
+-
+-### Test on video
+-You can run your code on video with the following script:
+-```sh
+-python -m performance_assessment.demo_video configs/tdt4265.py input_path output_path
+-```
+-Example:
+-```sh
+-python3 -m performance_assessment.demo_video configs/tdt4265.py Video00010_combined.avi output.avi
+-```
+-You can download the validation videos from [OneDrive](https://studntnu-my.sharepoint.com/:f:/g/personal/haakohu_ntnu_no/EhTbLF7OIrZHuUAc2FWAxYoBpFJxfuMoLVxyo519fcSTlw?e=ujXUU7).
+-These are the videos that are used in the current TDT4265 validation dataset.
+-
+-
+-
+-## Bencharking the data loader
+-The file `benchmark_data_loading.py` will automatically load your training dataset and benchmark how fast it is.
+-At the end, it will print out the number of images per second.
+-
+-```sh
+-python benchmark_data_loading.py configs/tdt4265.py
+-```
+-
+-## Uploading results to the leaderboard
+-Run the file:
+-```sh
+-python save_validation_results.py configs/tdt4265.py results.json
+-```
+-Remember to change the configuration file to the correct config.
+-The script will save a .json file to the second argument (results.json in this case), which you can upload to the leaderboard server.
++> I apologize for the code quality here, the handout code was a disaster and impossible to refactor
+diff --git a/Project/src/benchmarks/benchmark_data_loading.py b/Project/src/benchmarks/benchmark_data_loading.py
+deleted file mode 100644
+index c5114a4..0000000
+--- a/Project/src/benchmarks/benchmark_data_loading.py
++++ /dev/null
+@@ -1,34 +0,0 @@
+-import click
+-import numpy as np
+-import time
+-import torch
+-from utils.config import instantiate, LazyConfig
+-from utils.torch_utils import to_cuda
+-from pathlib import Path
+-np.random.seed(0)
+-
+-
+-@click.command()
+-@click.argument("config_path", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+-def main(config_path):
+-    cfg = LazyConfig.load(str(config_path))
+-    dataloader = instantiate(cfg.data_train.dataloader)
+-    gpu_transform = instantiate(cfg.data_train.gpu_transform)
+-    for batch in dataloader:  # Warmup
+-        batch = to_cuda(batch)
+-        batch = gpu_transform(batch)
+-    torch.cuda.synchronize()
+-    start_time = time.time()
+-    n_images = 0
+-    for batch in dataloader:
+-        batch = to_cuda(batch)
+-        batch = gpu_transform(batch)
+-        n_images += batch["image"].shape[0]
+-    torch.cuda.synchronize()
+-    elapsed_time = time.time() - start_time
+-    images_per_sec = n_images / elapsed_time
+-    print("Data pipeline runtime:", images_per_sec, "images/sec")
+-
+-
+-if __name__ == "__main__":
+-    main()
+diff --git a/Project/src/benchmarks/dataset_exploration.py b/Project/src/benchmarks/dataset_exploration.py
+deleted file mode 100644
+index 92f68ea..0000000
+--- a/Project/src/benchmarks/dataset_exploration.py
++++ /dev/null
+@@ -1,71 +0,0 @@
+-from utils.config import instantiate, LazyConfig
+-from utils import utils
+-
+-
+-def get_dataloader(cfg, dataset_to_visualize):
+-    if dataset_to_visualize == "train":
+-        # Remove GroundTruthBoxesToAnchors transform
+-        cfg.data_train.dataset.transform.transforms = cfg.data_train.dataset.transform.transforms[
+-            :-1]
+-        data_loader = instantiate(cfg.data_train.dataloader)
+-    else:
+-        cfg.data_val.dataloader.collate_fn = utils.batch_collate
+-        data_loader = instantiate(cfg.data_val.dataloader)
+-
+-    return data_loader
+-
+-
+-def analyze_dataloader(config, dataset_name):
+-    dataloader = get_dataloader(config, dataset_name)
+-
+-    labels = {}
+-    aspectRatios = {}  # Width / Height
+-
+-    for batch in utils.progress_bar(dataloader, f"Analyzing Dataset: {dataset_name}"):
+-        # Batch Contains:
+-        #   'image'     - image data
+-        #   'image_id'  - id of image (number)
+-        #   'width'     - width of image
+-        #   'height'    - height of image
+-        #   'labels'    - labels for the current image
+-        #   'boxes'     - boxes corresponsing to the labels
+-        image_width = float(batch["width"])
+-        image_height = float(batch["height"])
+-
+-        for image_labels, image_boxes in zip(batch["labels"], batch["boxes"]):
+-            for label, box in zip(image_labels, image_boxes):
+-                i = int(label)
+-
+-                # Increase counter for number of label occurrences
+-                if i not in labels:
+-                    labels[i] = 1
+-                else:
+-                    labels[i] = labels[i] + 1
+-
+-                # find aspect ratio of box and add it to dict list
+-                x_min, y_min, x_max, y_max = box
+-                width = (x_max - x_min)*image_width
+-                height = (y_max - y_min)*image_height
+-                aspectRatio = width/height
+-
+-                if i not in aspectRatios:
+-                    aspectRatios[i] = [aspectRatio]
+-                else:
+-                    aspectRatios[i].append(aspectRatio)
+-
+-    # Print Results for each label
+-    for i in sorted(labels.keys()):
+-        # Calculate average
+-        averageAspectRatio = sum(aspectRatios[i]) / len(aspectRatios[i])
+-
+-        print(
+-            f"{i} {config.label_map[i]}: Occurrences: {labels[i]} Average Aspect Ratio: {averageAspectRatio}"
+-        )
+-
+-
+-if __name__ == '__main__':
+-    config = LazyConfig.load("model/configs/tdt4265.py")
+-    config.train.batch_size = 1
+-
+-    analyze_dataloader(config, "train")
+-    analyze_dataloader(config, "val")
+diff --git a/Project/src/benchmarks/demo_video.py b/Project/src/benchmarks/demo_video.py
+deleted file mode 100644
+index 2019f78..0000000
+--- a/Project/src/benchmarks/demo_video.py
++++ /dev/null
+@@ -1,60 +0,0 @@
+-import pathlib
+-import torch
+-import tqdm
+-import click
+-import numpy as np
+-import cv2
+-from PIL import Image
+-from vizer.draw import draw_boxes
+-from pathlib import Path
+-
+-import model.tops as tops
+-import utils
+-from utils.config import instantiate
+-from model.tops.checkpointer import load_checkpoint
+-
+-
+-@torch.no_grad()
+-@click.command()
+-@click.argument("config_path", type=click.Path(exists=True, dir_okay=False, path_type=str))
+-@click.argument("video_path", type=click.Path(dir_okay=True, path_type=str))
+-@click.argument("output_path", type=click.Path(dir_okay=True, path_type=str))
+-@click.option("-s", "--score_threshold", type=click.FloatRange(min=0, max=1), default=.5)
+-def run_demo(config_path: str, score_threshold: float, video_path: str, output_path: str):
+-    cfg = utils.load_config(config_path)
+-    model = tops.to_cuda(instantiate(cfg.model))
+-    model.eval()
+-    ckpt = load_checkpoint(cfg.output_dir.joinpath(
+-        "checkpoints"), map_location=tops.get_device())
+-    model.load_state_dict(ckpt["model"])
+-    width, height = 1024, 128
+-
+-    reader = cv2.VideoCapture(video_path)
+-    fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
+-    writer = cv2.VideoWriter(output_path, fourcc, 30, (width, height))
+-    cpu_transform = instantiate(cfg.data_val.dataset.transform)
+-    gpu_transform = instantiate(cfg.data_val.gpu_transform)
+-    video_length = int(reader.get(cv2.CAP_PROP_FRAME_COUNT))
+-
+-    assert reader.isOpened()
+-    for frame_idx in tqdm.trange(video_length, desc="Predicting on video"):
+-        ret, frame = reader.read()
+-        assert ret, "An error occurred"
+-        frame = np.ascontiguousarray(frame[:, :, ::-1])
+-        img = cpu_transform({"image": frame})["image"].unsqueeze(0)
+-        img = tops.to_cuda(img)
+-        img = gpu_transform({"image": img})["image"]
+-        boxes, categories, scores = model(
+-            img, score_threshold=score_threshold)[0]
+-        boxes[:, [0, 2]] *= width
+-        boxes[:, [1, 3]] *= height
+-        boxes, categories, scores = [_.cpu().numpy()
+-                                     for _ in [boxes, categories, scores]]
+-        frame = draw_boxes(
+-            frame, boxes, categories, scores).astype(np.uint8)
+-        writer.write(frame[:, :, ::-1])
+-    print("Video saved to:", pathlib.Path(output_path).absolute())
+-
+-
+-if __name__ == '__main__':
+-    run_demo()
+diff --git a/Project/src/benchmarks/runtime_analysis.py b/Project/src/benchmarks/runtime_analysis.py
+deleted file mode 100644
+index 2643089..0000000
+--- a/Project/src/benchmarks/runtime_analysis.py
++++ /dev/null
+@@ -1,49 +0,0 @@
+-import time
+-import click
+-import torch
+-from pathlib import Path
+-
+-import model.tops as tops
+-import utils
+-from utils.config import instantiate
+-from model.tops.checkpointer import load_checkpoint
+-
+-
+-@torch.no_grad()
+-def evaluation(cfg, N_images: int):
+-    model = instantiate(cfg.model)
+-    model.eval()
+-    model = tops.to_cuda(model)
+-    ckpt = load_checkpoint(cfg.output_dir.joinpath(
+-        "checkpoints"), map_location=tops.get_device())
+-    model.load_state_dict(ckpt["model"])
+-    dataloader_val = instantiate(cfg.data_val.dataloader)
+-    batch = next(iter(dataloader_val))
+-    gpu_transform = instantiate(cfg.data_val.gpu_transform)
+-    batch = tops.to_cuda(batch)
+-    batch = gpu_transform(batch)
+-    images = batch["image"]
+-    imshape = list(images.shape[2:])
+-    # warmup
+-    print("Checking runtime for image shape:", imshape)
+-    for i in range(10):
+-        model(images)
+-    start_time = time.time()
+-    for i in range(N_images):
+-        outputs = model(images)
+-    total_time = time.time() - start_time
+-    print("Runtime for image shape:", imshape)
+-    print("Total runtime:", total_time)
+-    print("FPS:", N_images / total_time)
+-
+-
+-@click.command()
+-@click.argument("config_path", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+-@click.option("-n", "--n-images", default=100, type=int)
+-def main(config_path: Path, n_images: int):
+-    cfg = utils.load_config(config_path)
+-    evaluation(cfg, n_images)
+-
+-
+-if __name__ == '__main__':
+-    main()
+diff --git a/Project/src/benchmarks/save_comparison_images.py b/Project/src/benchmarks/save_comparison_images.py
+deleted file mode 100644
+index 5908395..0000000
+--- a/Project/src/benchmarks/save_comparison_images.py
++++ /dev/null
+@@ -1,155 +0,0 @@
+-import cv2
+-import os
+-import click
+-import numpy as np
+-from vizer.draw import draw_boxes
+-from tqdm import tqdm
+-
+-import model.tops as tops
+-from utils.config import instantiate
+-from utils.config import LazyCall as L
+-from model.tops.checkpointer import load_checkpoint
+-import utils
+-from data.transforms import ToTensor
+-
+-
+-def get_config(config_path):
+-    cfg = utils.load_config(config_path)
+-    cfg.train.batch_size = 1
+-    cfg.data_train.dataloader.shuffle = False
+-    cfg.data_val.dataloader.shuffle = False
+-    return cfg
+-
+-
+-def get_trained_model(cfg):
+-    model = tops.to_cuda(instantiate(cfg.model))
+-    model.eval()
+-    ckpt = load_checkpoint(cfg.output_dir.joinpath(
+-        "checkpoints"), map_location=tops.get_device())
+-    model.load_state_dict(ckpt["model"])
+-    return model
+-
+-
+-def get_dataloader(cfg, dataset_to_visualize):
+-    # We use just to_tensor to get rid of all data augmentation, etc...
+-    to_tensor_transform = [
+-        L(ToTensor)()
+-    ]
+-    if dataset_to_visualize == "train":
+-        cfg.data_train.dataset.transform.transforms = to_tensor_transform
+-        data_loader = instantiate(cfg.data_train.dataloader)
+-    else:
+-        cfg.data_val.dataset.transform.transforms = to_tensor_transform
+-        cfg.data_val.dataloader.collate_fn = utils.batch_collate
+-        data_loader = instantiate(cfg.data_val.dataloader)
+-
+-    return data_loader
+-
+-
+-def convert_boxes_coords_to_pixel_coords(boxes, width, height):
+-    boxes[:, [0, 2]] *= width
+-    boxes[:, [1, 3]] *= height
+-    return boxes.cpu().numpy()
+-
+-
+-def convert_image_to_hwc_byte(image):
+-    first_image_in_batch = image[0]  # This is the only image in batch
+-    image_pixel_values = (first_image_in_batch * 255).byte()
+-    image_h_w_c_format = image_pixel_values.permute(1, 2, 0)
+-    return image_h_w_c_format.cpu().numpy()
+-
+-
+-def visualize_annotations_on_image(image, batch, label_map):
+-    boxes = convert_boxes_coords_to_pixel_coords(
+-        batch["boxes"][0], batch["width"], batch["height"])
+-    labels = batch["labels"][0].cpu().numpy().tolist()
+-
+-    image_with_boxes = draw_boxes(
+-        image, boxes, labels, class_name_map=label_map)
+-    return image_with_boxes
+-
+-
+-def visualize_model_predictions_on_image(image, img_transform, batch, model, label_map, score_threshold):
+-    pred_image = tops.to_cuda(batch["image"])
+-    transformed_image = img_transform({"image": pred_image})["image"]
+-
+-    boxes, categories, scores = model(
+-        transformed_image, score_threshold=score_threshold)[0]
+-    boxes = convert_boxes_coords_to_pixel_coords(
+-        boxes.detach().cpu(), batch["width"], batch["height"])
+-    categories = categories.cpu().numpy().tolist()
+-
+-    image_with_predicted_boxes = draw_boxes(
+-        image, boxes, categories, scores, class_name_map=label_map)
+-    return image_with_predicted_boxes
+-
+-
+-def create_filepath(save_folder, image_id):
+-    filename = "image_" + str(image_id) + ".png"
+-    return os.path.join(save_folder, filename)
+-
+-
+-def create_comparison_image(batch, model, img_transform, label_map, score_threshold):
+-    image = convert_image_to_hwc_byte(batch["image"])
+-    image_with_annotations = visualize_annotations_on_image(
+-        image, batch, label_map)
+-    image_with_model_predictions = visualize_model_predictions_on_image(
+-        image, img_transform, batch, model, label_map, score_threshold)
+-
+-    concatinated_image = np.concatenate([
+-        image,
+-        image_with_annotations,
+-        image_with_model_predictions
+-    ], axis=0)
+-    return concatinated_image
+-
+-
+-def create_and_save_comparison_images(dataloader, model, cfg, save_folder, score_threshold, num_images):
+-    if not os.path.exists(save_folder):
+-        os.makedirs(save_folder)
+-
+-    print("Saving images to", save_folder)
+-
+-    num_images_to_save = min(len(dataloader), num_images)
+-    dataloader = iter(dataloader)
+-
+-    img_transform = instantiate(cfg.data_val.gpu_transform)
+-    for i in tqdm(range(num_images_to_save)):
+-        batch = next(dataloader)
+-        comparison_image = create_comparison_image(
+-            batch, model, img_transform, cfg.label_map, score_threshold)
+-        filepath = create_filepath(save_folder, i)
+-        cv2.imwrite(filepath, comparison_image[:, :, ::-1])
+-
+-
+-def get_save_folder_name(cfg, dataset_to_visualize):
+-    return os.path.join(
+-        "performance_assessment",
+-        cfg.run_name,
+-        dataset_to_visualize
+-    )
+-
+-
+-@click.command()
+-@click.argument("config_path")
+-@click.option("--train", default=False, is_flag=True, help="Use the train dataset instead of val")
+-@click.option("-n", "--num_images", default=500, type=int, help="The max number of images to save")
+-@click.option("-c", "--conf_threshold", default=0.3, type=float, help="The confidence threshold for predictions")
+-def main(config_path, train, num_images, conf_threshold):
+-    cfg = get_config(config_path)
+-    model = get_trained_model(cfg)
+-
+-    if train:
+-        dataset_to_visualize = "train"
+-    else:
+-        dataset_to_visualize = "val"
+-
+-    dataloader = get_dataloader(cfg, dataset_to_visualize)
+-    save_folder = get_save_folder_name(cfg, dataset_to_visualize)
+-
+-    create_and_save_comparison_images(
+-        dataloader, model, cfg, save_folder, conf_threshold, num_images)
+-
+-
+-if __name__ == '__main__':
+-    main()
+diff --git a/Project/src/benchmarks/save_images_with_annotations.py b/Project/src/benchmarks/save_images_with_annotations.py
+deleted file mode 100644
+index cd6daf7..0000000
+--- a/Project/src/benchmarks/save_images_with_annotations.py
++++ /dev/null
+@@ -1,99 +0,0 @@
+-import cv2
+-import os
+-import numpy as np
+-from vizer.draw import draw_boxes
+-
+-from utils.config import instantiate, LazyConfig
+-import utils.utils as utils
+-
+-
+-def get_config(config_path):
+-    cfg = LazyConfig.load(config_path)
+-    cfg.data_train.dataloader.shuffle = False
+-    cfg.data_val.dataloader.shuffle = False
+-    cfg.train.batch_size = 1
+-    return cfg
+-
+-
+-def get_dataloader(cfg, dataset_to_visualize):
+-    if dataset_to_visualize == "train":
+-        # Remove GroundTruthBoxesToAnchors transform
+-        cfg.data_train.dataset.transform.transforms = cfg.data_train.dataset.transform.transforms[
+-            :-1]
+-        data_loader = instantiate(cfg.data_train.dataloader)
+-    else:
+-        cfg.data_val.dataloader.collate_fn = utils.batch_collate
+-        data_loader = instantiate(cfg.data_val.dataloader)
+-
+-    return data_loader
+-
+-
+-def convert_boxes_coords_to_pixel_coords(boxes, width, height):
+-    boxes_for_first_image = boxes[0]  # This is the only image in batch
+-    boxes_for_first_image[:, [0, 2]] *= width
+-    boxes_for_first_image[:, [1, 3]] *= height
+-    return boxes_for_first_image.cpu().numpy()
+-
+-
+-def convert_image_to_hwc_byte(image):
+-    first_image_in_batch = image[0]  # This is the only image in batch
+-    image_pixel_values = (first_image_in_batch * 255).byte()
+-    image_h_w_c_format = image_pixel_values.permute(1, 2, 0)
+-    return image_h_w_c_format.cpu().numpy()
+-
+-
+-def visualize_boxes_on_image(batch, label_map):
+-    image = convert_image_to_hwc_byte(batch["image"])
+-    boxes = convert_boxes_coords_to_pixel_coords(
+-        batch["boxes"], batch["width"], batch["height"])
+-    labels = batch["labels"][0].cpu().numpy().tolist()
+-
+-    image_with_boxes = draw_boxes(
+-        image, boxes, labels, class_name_map=label_map)
+-    return image_with_boxes
+-
+-
+-def create_viz_image(batch, label_map):
+-    image_without_annotations = convert_image_to_hwc_byte(batch["image"])
+-    image_with_annotations = visualize_boxes_on_image(batch, label_map)
+-
+-    # We concatinate in the height axis, so that the images are placed on top of
+-    # each other
+-    concatinated_image = np.concatenate([
+-        image_without_annotations,
+-        image_with_annotations,
+-    ], axis=0)
+-    return concatinated_image
+-
+-
+-def create_filepath(save_folder, image_id):
+-    filename = "image_" + str(image_id) + ".png"
+-    return os.path.join(save_folder, filename)
+-
+-
+-def save_images_with_annotations(dataloader, cfg, save_folder, num_images_to_visualize):
+-    if not os.path.exists(save_folder):
+-        os.makedirs(save_folder)
+-
+-    print("Saving images to", save_folder)
+-
+-    num_images_to_save = min(len(dataloader), num_images_to_visualize)
+-    dataloader = iter(dataloader)
+-
+-    for i in utils.progress_bar(range(num_images_to_save), f"Saving Images"):
+-        batch = next(dataloader)
+-        viz_image = create_viz_image(batch, cfg.label_map)
+-        filepath = create_filepath(save_folder, i)
+-        cv2.imwrite(filepath, viz_image[:, :, ::-1])
+-
+-
+-if __name__ == '__main__':
+-    config_path = "model/configs/tdt4265.py"
+-    cfg = get_config(config_path)
+-    dataset_to_visualize = "train"  # or "val"
+-    num_images_to_visualize = 100  # Increase this if you want to save more images
+-
+-    dataloader = get_dataloader(cfg, dataset_to_visualize)
+-    save_folder = os.path.join(utils.get_output_dir(), "annotation_images")
+-    save_images_with_annotations(
+-        dataloader, cfg, save_folder, num_images_to_visualize)
+diff --git a/Project/src/benchmarks/save_validation_results.py b/Project/src/benchmarks/save_validation_results.py
+deleted file mode 100644
+index 5109584..0000000
+--- a/Project/src/benchmarks/save_validation_results.py
++++ /dev/null
+@@ -1,64 +0,0 @@
+-import pathlib
+-import click
+-import tqdm
+-import torch
+-import json
+-
+-import model.tops as tops
+-from utils.config import instantiate
+-from model.tops.checkpointer import load_checkpoint
+-from utils import load_config, bbox_ltrb_to_ltwh
+-
+-
+-@torch.no_grad()
+-@click.command()
+-@click.argument("config_path")
+-@click.argument("save_path", type=pathlib.Path)
+-def get_detections(config_path, save_path):
+-    cfg = load_config(config_path)
+-    model = instantiate(cfg.model)
+-    model.eval()
+-    ckpt = load_checkpoint(cfg.output_dir.joinpath(
+-        "checkpoints"), map_location=tops.get_device())
+-    model.load_state_dict(ckpt["model"])
+-    model = tops.to_cuda(model)
+-    data_val = instantiate(cfg.data_val.dataloader)
+-    gpu_transform = instantiate(cfg.data_val.gpu_transform)
+-    detections = []
+-
+-    for batch in tqdm.tqdm(data_val, desc="Evaluating on dataset"):
+-        batch["image"] = tops.to_cuda(batch["image"])
+-        batch = gpu_transform(batch)
+-        with torch.cuda.amp.autocast(enabled=tops.AMP()):
+-            # You can change the nms IOU threshold!
+-            predictions = model(batch["image"], nms_iou_threshold=0.50, max_output=200,
+-                                score_threshold=0.05)
+-
+-        for idx in range(len(predictions)):
+-            boxes_ltrb, categories, scores = predictions[idx]
+-            # ease-of-use for specific predictions
+-            H, W = batch["height"][idx], batch["width"][idx]
+-            box_ltwh = bbox_ltrb_to_ltwh(boxes_ltrb)
+-            box_ltwh[:, [0, 2]] *= W
+-            box_ltwh[:, [1, 3]] *= H
+-            box_ltwh, category, score = [x.cpu()
+-                                         for x in [box_ltwh, categories, scores]]
+-            img_id = batch["image_id"][idx].item()
+-            for b_ltwh, label_, prob_ in zip(box_ltwh, category, score):
+-                detections.append(dict(
+-                    image_id=img_id,
+-                    category_id=int(label_),
+-                    score=prob_.item(),
+-                    bbox=b_ltwh.tolist()
+-                ))
+-
+-    save_path.parent.mkdir(exist_ok=True, parents=True)
+-    with open(save_path, "w") as fp:
+-        json.dump(detections, fp)
+-    print("Detections saved to:", save_path)
+-    print("Abolsute path:", save_path.absolute())
+-    print("Go to: https://tdt4265-annotering.idi.ntnu.no/submissions/ to submit your result")
+-
+-
+-if __name__ == "__main__":
+-    get_detections()
+diff --git a/Project/src/data/__init__.py b/Project/src/data/__init__.py
+deleted file mode 100644
+index c56709f..0000000
+--- a/Project/src/data/__init__.py
++++ /dev/null
+@@ -1,12 +0,0 @@
+-import pathlib
+-
+-
+-def get_dataset_dir(dataset_relpath: str):
+-    server_dir = pathlib.Path("/work/datasets", dataset_relpath)
+-    if server_dir.is_dir():
+-        print("Found dataset directory in:", server_dir)
+-        return str(server_dir)
+-    if server_dir.is_file():
+-        print("Found dataset file in:", server_dir)
+-        return str(server_dir)
+-    return str(pathlib.Path("data", dataset_relpath))
+diff --git a/Project/src/data/tdt4265_dataset.py b/Project/src/data/tdt4265_dataset.py
+deleted file mode 100644
+index b3b5e9a..0000000
+--- a/Project/src/data/tdt4265_dataset.py
++++ /dev/null
+@@ -1,92 +0,0 @@
+-import pathlib
+-import numpy as np
+-import torch.utils.data as data
+-import os
+-import json
+-from PIL import Image
+-from pycocotools.coco import COCO
+-
+-
+-class TDT4265Dataset(data.Dataset):
+-    class_names = ("background", "car", "truck", "bus", "motorcycle", "bicycle", "scooter", "person", "rider")
+-
+-    def __init__(self, img_folder, annotation_file, transform=None):
+-        self.img_folder = img_folder
+-        self.annotate_file = annotation_file
+-
+-        # Start processing annotation
+-        with open(annotation_file) as fin:
+-            self.data = json.load(fin)
+-
+-        self.images = {}
+-
+-        self.label_map = {}
+-        self.label_info = {}
+-        cnt = 0
+-        self.label_info[cnt] = "background"
+-        for cat in self.data["categories"]:
+-            cnt += 1
+-            self.label_map[cat["id"]] = cnt
+-            self.label_info[cnt] = cat["name"]
+-        # build inference for images
+-        for img in self.data["images"]:
+-            img_id = img["id"]
+-            img_name = img["file_name"]
+-            img_size = (img["height"], img["width"])
+-            if img_id in self.images:
+-                raise Exception("dulpicated image record")
+-            self.images[img_id] = (img_name, img_size, [])
+-
+-        # read bboxes
+-        for bboxes in self.data["annotations"]:
+-            img_id = bboxes["image_id"]
+-            bbox = bboxes["bbox"]
+-            bbox_label = self.label_map[bboxes["category_id"]]
+-            self.images[img_id][2].append((bbox, bbox_label))
+-
+-        for k, v in list(self.images.items()):
+-            if len(v[2]) == 0:
+-                self.images.pop(k)
+-        self.img_keys = list(self.images.keys())
+-        # Sorts the dataset to iterate over frames in the correct order
+-        sort_frame = lambda k: int(str(pathlib.Path(k).stem.split("_")[-1]))
+-        sort_video = lambda k: int(str(pathlib.Path(k).stem.split("_")[-2].replace("Video", "")))
+-        self.img_keys.sort(key=lambda key: sort_frame(self.images[key][0]))
+-        self.img_keys.sort(key=lambda key: sort_video(self.images[key][0]))
+-        self.transform = transform
+-
+-    def __len__(self):
+-        return len(self.images)
+-
+-    def __getitem__(self, idx):
+-        img_id = self.img_keys[idx]
+-        img_data = self.images[img_id]
+-        fn = img_data[0]
+-        img_path = os.path.join(self.img_folder, fn)
+-        img = Image.open(img_path).convert("RGB")
+-
+-        htot, wtot = img_data[1]
+-        bbox_ltrb = []
+-        bbox_labels = []
+-
+-        for (l, t, w, h), bbox_label in img_data[2]:
+-            r = l + w
+-            b = t + h
+-            bbox_size = (l / wtot, t / htot, r / wtot, b / htot)
+-            bbox_ltrb.append(bbox_size)
+-            bbox_labels.append(bbox_label)
+-
+-        bbox_ltrb = np.array(bbox_ltrb).astype(np.float32)
+-        bbox_labels = np.array(bbox_labels)
+-        img = np.array(img)
+-
+-        sample = dict(
+-            image=img, boxes=bbox_ltrb, labels=bbox_labels,
+-            width=wtot, height=htot, image_id=img_id
+-        )
+-        if self.transform:
+-            sample = self.transform(sample)
+-        return sample
+-
+-    def get_annotations_as_coco(self):
+-        return COCO(self.annotate_file)
+diff --git a/Project/src/data/transforms/__init__.py b/Project/src/data/transforms/__init__.py
+deleted file mode 100644
+index 1644ca3..0000000
+--- a/Project/src/data/transforms/__init__.py
++++ /dev/null
+@@ -1,3 +0,0 @@
+-from .transform import ToTensor, RandomSampleCrop, RandomHorizontalFlip, Resize
+-from .target_transform import GroundTruthBoxesToAnchors
+-from .gpu_transforms import Normalize, ColorJitter
+diff --git a/Project/src/data/transforms/gpu_transforms.py b/Project/src/data/transforms/gpu_transforms.py
+deleted file mode 100644
+index af596ad..0000000
+--- a/Project/src/data/transforms/gpu_transforms.py
++++ /dev/null
+@@ -1,24 +0,0 @@
+-import torch
+-import torchvision
+-
+-
+-class Normalize(torch.nn.Module):
+-    def __init__(self, mean, std):
+-        super().__init__()
+-        self.mean = torch.tensor(mean).float().view(1, len(mean), 1, 1)
+-        self.std = torch.tensor(std).float().view(1, len(mean), 1, 1)
+-
+-    @torch.no_grad()
+-    def forward(self, batch):
+-        self.mean = self.mean.to(batch["image"].device)
+-        self.std = self.std.to(batch["image"].device)
+-        batch["image"] = (batch["image"] - self.mean) / self.std
+-        return batch
+-
+-
+-class ColorJitter(torchvision.transforms.ColorJitter):
+-
+-    @torch.no_grad()
+-    def forward(self, batch):
+-        batch["image"] = super().forward(batch["image"])
+-        return batch
+diff --git a/Project/src/data/transforms/target_transform.py b/Project/src/data/transforms/target_transform.py
+deleted file mode 100644
+index c80f31c..0000000
+--- a/Project/src/data/transforms/target_transform.py
++++ /dev/null
+@@ -1,22 +0,0 @@
+-import torch
+-
+-from model.modeling.anchor_encoder import AnchorEncoder
+-
+-
+-class GroundTruthBoxesToAnchors(torch.nn.Module):
+-
+-    def __init__(self, anchors, iou_threshold: float):
+-        super().__init__()
+-        self.iou_threshold = iou_threshold
+-
+-        self.anchors = anchors
+-        self.encoder = AnchorEncoder(self.anchors)
+-
+-    @property
+-    def dboxes(self):
+-        return self.anchors
+-
+-    def __call__(self, sample):
+-        bbox, label = self.encoder.encode(
+-            sample["boxes"], sample["labels"], self.iou_threshold)
+-        return dict(image=sample["image"], boxes=bbox, labels=label)
+diff --git a/Project/src/data/transforms/transform.py b/Project/src/data/transforms/transform.py
+deleted file mode 100644
+index 91d3112..0000000
+--- a/Project/src/data/transforms/transform.py
++++ /dev/null
+@@ -1,188 +0,0 @@
+-import torchvision
+-import torch
+-import numpy as np
+-import random
+-
+-class ToTensor:
+-    def __call__(self, sample):
+-        sample["image"] = torch.from_numpy(np.rollaxis(sample["image"], 2, 0)).float() / 255
+-        if "boxes" in sample:
+-            sample["boxes"] = torch.from_numpy(sample["boxes"])
+-            sample["labels"] = torch.from_numpy(sample["labels"])
+-        return sample
+-
+-
+-def intersect(box_a, box_b):
+-    max_xy = np.minimum(box_a[:, 2:], box_b[2:])
+-    min_xy = np.maximum(box_a[:, :2], box_b[:2])
+-    inter = np.clip((max_xy - min_xy), a_min=0, a_max=np.inf)
+-    return inter[:, 0] * inter[:, 1]
+-
+-
+-def jaccard_numpy(box_a, box_b):
+-    """Compute the jaccard overlap of two sets of boxes.  The jaccard overlap
+-    is simply the intersection over union of two boxes.
+-    E.g.:
+-        A ∩ B / A ∪ B = A ∩ B / (area(A) + area(B) - A ∩ B)
+-    Args:
+-        box_a: Multiple bounding boxes, Shape: [num_boxes,4]
+-        box_b: Single bounding box, Shape: [4]
+-    Return:
+-        jaccard overlap: Shape: [box_a.shape[0], box_a.shape[1]]
+-    """
+-    inter = intersect(box_a, box_b)
+-    area_a = ((box_a[:, 2] - box_a[:, 0]) *
+-              (box_a[:, 3] - box_a[:, 1]))  # [A,B]
+-    area_b = ((box_b[2] - box_b[0]) *
+-              (box_b[3] - box_b[1]))  # [A,B]
+-    union = area_a + area_b - inter
+-    return inter / union  # [A,B]
+-
+-
+-class RandomSampleCrop(torch.nn.Module):
+-    """Crop
+-    Implementation originally from: https://github.com/lufficc/SSD
+-
+-    NOTE: This function needs to be run before to_tensor
+-    Arguments:
+-        sample dict containing at least the following:
+-        img (np.ndarray): the image being input during training
+-        boxes (np.ndarray): the original bounding boxes in pt form
+-        labels (np.ndarray): the class labels for each bbox
+-    Return:
+-        the same sample dict with modified img, boxes and labels
+-    """
+-
+-    def __init__(self):
+-        super().__init__()
+-        self.sample_options = (
+-            # using entire original input image
+-            None,
+-            # sample a patch s.t. MIN jaccard w/ obj in .1,.3,.4,.7,.9
+-            (0.1, None),
+-            (0.3, None),
+-            (0.7, None),
+-            (0.9, None),
+-            # randomly sample a patch
+-            (None, None),
+-        )
+-
+-    def __call__(self, sample):
+-        image = sample["image"]
+-        boxes = sample["boxes"]
+-        labels = sample["labels"]
+-        # guard against no boxes
+-        if boxes is not None and boxes.shape[0] == 0:
+-            return sample
+-        height, width, _ = image.shape
+-        original_aspect_ratio = height / width
+-
+-        boxes = boxes.copy()
+-        boxes[:, [0, 2]] *= width
+-        boxes[:, [1, 3]] *= height
+-        while True:
+-            # randomly choose a mode
+-            mode = random.choice(self.sample_options)
+-            if mode is None:
+-                return sample
+-
+-            min_iou, max_iou = mode
+-            if min_iou is None:
+-                min_iou = float('-inf')
+-            if max_iou is None:
+-                max_iou = float('inf')
+-
+-            # max trails (50)
+-            for _ in range(50):
+-                current_image = image
+-
+-                w = np.random.uniform(0.3 * width, width)
+-                h = np.random.uniform(0.3 * height, height)
+-
+-                # aspect ratio constraint b/t .5 & 2
+-                if h / w < (original_aspect_ratio / 2) or h / w > (original_aspect_ratio * 2):
+-                    continue
+-
+-                left = np.random.uniform(width - w)
+-                top = np.random.uniform(height - h)
+-
+-                # convert to integer rect x1,y1,x2,y2
+-                rect = np.array([int(left), int(top), int(left + w), int(top + h)])
+-
+-                # calculate IoU (jaccard overlap) b/t the cropped and gt boxes
+-                overlap = jaccard_numpy(boxes, rect)
+-
+-                # is min and max overlap constraint satisfied? if not try again
+-                if overlap.max() < min_iou or overlap.min() > max_iou:
+-                    continue
+-
+-                # cut the crop from the image
+-                current_image = current_image[rect[1]:rect[3], rect[0]:rect[2], :]
+-
+-                # keep overlap with gt box IF center in sampled patch
+-                centers = (boxes[:, :2] + boxes[:, 2:]) / 2.0
+-
+-                # mask in all gt boxes that above and to the left of centers
+-                m1 = (rect[0] < centers[:, 0]) * (rect[1] < centers[:, 1])
+-
+-                # mask in all gt boxes that under and to the right of centers
+-                m2 = (rect[2] > centers[:, 0]) * (rect[3] > centers[:, 1])
+-
+-                # mask in that both m1 and m2 are true
+-                mask = m1 * m2
+-
+-                # have any valid boxes? try again if not
+-                if not mask.any():
+-                    continue
+-
+-                # take only matching gt boxes
+-                current_boxes = boxes[mask, :].copy()
+-
+-                # take only matching gt labels
+-                current_labels = labels[mask]
+-
+-                # should we use the box left and top corner or the crop's
+-                current_boxes[:, :2] = np.maximum(current_boxes[:, :2],
+-                                                    rect[:2])
+-                # adjust to crop (by substracting crop's left,top)
+-                current_boxes[:, :2] -= rect[:2]
+-
+-                current_boxes[:, 2:] = np.minimum(current_boxes[:, 2:],
+-                                                    rect[2:])
+-                # adjust to crop (by substracting crop's left,top)
+-                current_boxes[:, 2:] -= rect[:2]
+-                current_boxes[:, [0, 2]] /= w
+-                current_boxes[:, [1, 3]] /= h
+-
+-                sample["image"] = current_image
+-                sample["boxes"] = current_boxes
+-                sample["labels"] = current_labels
+-                return sample
+-
+-
+-class RandomHorizontalFlip(torch.nn.Module):
+-
+-    def __init__(self, p=0.5) -> None:
+-        super().__init__()
+-        self.p = p
+-
+-    def __call__(self, sample):
+-        image = sample["image"]
+-        if np.random.uniform() < self.p:
+-            sample["image"] = image.flip(-1)
+-            boxes = sample["boxes"]
+-            boxes[:, [0, 2]] = 1 - boxes[:, [2, 0]]
+-            sample["boxes"] = boxes
+-        return sample
+-
+-
+-class Resize(torch.nn.Module):
+-
+-    def __init__(self, imshape) -> None:
+-        super().__init__()
+-        self.imshape = tuple(imshape)
+-
+-    @torch.no_grad()
+-    def forward(self, batch):
+-        batch["image"] = torchvision.transforms.functional.resize(batch["image"], self.imshape, antialias=True)
+-        return batch
+diff --git a/Project/src/model/configs/tdt4265.py b/Project/src/model/configs/tdt4265.py
+deleted file mode 100644
+index 7d0a5b7..0000000
+--- a/Project/src/model/configs/tdt4265.py
++++ /dev/null
+@@ -1,112 +0,0 @@
+-# Inherit configs from the default ssd300
+-import torchvision
+-import torch
+-from torch.optim.lr_scheduler import MultiStepLR, LinearLR
+-
+-import utils.utils as utils
+-from model.modeling import SSD300, SSDMultiboxLoss, AnchorBoxes
+-from model.model import BasicModel as Model
+-from utils.config import LazyCall as L
+-from data.transforms import Normalize, ToTensor, GroundTruthBoxesToAnchors
+-from data.tdt4265_dataset import TDT4265Dataset
+-from utils.config import LazyCall as L
+-from data.transforms import (
+-    ToTensor, Normalize, Resize, GroundTruthBoxesToAnchors
+-)
+-from data import get_dataset_dir
+-
+-
+-train = dict(
+-    batch_size=32,
+-    amp=True,  # Automatic mixed precision
+-    log_interval=20,
+-    seed=0,
+-    epochs=50,
+-    _output_dir=utils.get_output_dir(),
+-    imshape=(128, 1024),
+-    image_channels=3
+-)
+-
+-anchors = L(AnchorBoxes)(
+-    feature_sizes=[[38, 38], [19, 19], [10, 10], [5, 5], [3, 3], [1, 1]],
+-    # Strides is the number of pixels (in image space) between each spatial position in the feature map
+-    strides=[[8, 8], [16, 16], [32, 32], [64, 64], [100, 100], [300, 300]],
+-    min_sizes=[[30, 30], [60, 60], [111, 111], [
+-        162, 162], [213, 213], [264, 264], [315, 315]],
+-    # aspect ratio is defined per feature map (first index is largest feature map (38x38))
+-    # aspect ratio is used to define two boxes per element in the list.
+-    # if ratio=[2], boxes will be created with ratio 1:2 and 2:1
+-    # Number of boxes per location is in total 2 + 2 per aspect ratio
+-    aspect_ratios=[[2], [2, 3], [2, 3], [2, 3], [2], [2]],
+-    image_shape="${train.imshape}",
+-    scale_center_variance=0.1,
+-    scale_size_variance=0.2
+-)
+-
+-backbone = L(Model)(
+-    output_channels=[128, 256, 128, 128, 64, 64],
+-    image_channels="${train.image_channels}",
+-    output_feature_sizes="${anchors.feature_sizes}"
+-)
+-
+-loss_objective = L(SSDMultiboxLoss)(anchors="${anchors}")
+-
+-model = L(SSD300)(
+-    feature_extractor="${backbone}",
+-    anchors="${anchors}",
+-    loss_objective="${loss_objective}",
+-    num_classes=8 + 1  # Add 1 for background class
+-)
+-
+-optimizer = L(torch.optim.SGD)(
+-    lr=5e-3, momentum=0.9, weight_decay=0.0005
+-)
+-
+-schedulers = dict(
+-    linear=L(LinearLR)(start_factor=0.1, end_factor=1, total_iters=500),
+-    multistep=L(MultiStepLR)(milestones=[], gamma=0.1)
+-)
+-
+-train_cpu_transform = L(torchvision.transforms.Compose)(transforms=[
+-    L(ToTensor)(),
+-    L(Resize)(imshape="${train.imshape}"),
+-    L(GroundTruthBoxesToAnchors)(anchors="${anchors}", iou_threshold=0.5),
+-])
+-
+-val_cpu_transform = L(torchvision.transforms.Compose)(transforms=[
+-    L(ToTensor)(),
+-    L(Resize)(imshape="${train.imshape}"),
+-])
+-
+-gpu_transform = L(torchvision.transforms.Compose)(transforms=[
+-    L(Normalize)(mean=[0.4765, 0.4774, 0.2259], std=[0.2951, 0.2864, 0.2878])
+-])
+-
+-data_train = dict(
+-    dataset=L(TDT4265Dataset)(
+-        img_folder=get_dataset_dir("tdt4265_2022"),
+-        transform="${train_cpu_transform}",
+-        annotation_file=get_dataset_dir("tdt4265_2022/train_annotations.json")
+-    ),
+-    dataloader=L(torch.utils.data.DataLoader)(
+-        dataset="${..dataset}", num_workers=2, pin_memory=True, shuffle=True, batch_size="${...train.batch_size}", collate_fn=utils.batch_collate,
+-        drop_last=True
+-    ),
+-    # GPU transforms can heavily speedup data augmentations.
+-    gpu_transform=gpu_transform
+-)
+-data_val = dict(
+-    dataset=L(TDT4265Dataset)(
+-        img_folder=get_dataset_dir("tdt4265_2022"),
+-        transform="${val_cpu_transform}",
+-        annotation_file=get_dataset_dir("tdt4265_2022/val_annotations.json")
+-    ),
+-    dataloader=L(torch.utils.data.DataLoader)(
+-        dataset="${..dataset}", num_workers=2, pin_memory=True, shuffle=False, batch_size="${...train.batch_size}", collate_fn=utils.batch_collate_val
+-    ),
+-    gpu_transform=gpu_transform
+-)
+-
+-
+-label_map = {idx: cls_name for idx,
+-             cls_name in enumerate(TDT4265Dataset.class_names)}
+diff --git a/Project/src/model/configs/tdt4265_updated.py b/Project/src/model/configs/tdt4265_updated.py
+deleted file mode 100644
+index 7983035..0000000
+--- a/Project/src/model/configs/tdt4265_updated.py
++++ /dev/null
+@@ -1,25 +0,0 @@
+-from data import get_dataset_dir
+-
+-# Import everything from the old dataset and only change the dataset folder.
+-from .tdt4265 import (
+-    train,
+-    optimizer,
+-    schedulers,
+-    loss_objective,
+-    model,
+-    backbone,
+-    data_train,
+-    data_val,
+-    train_cpu_transform,
+-    val_cpu_transform,
+-    gpu_transform,
+-    label_map
+-)
+-
+-
+-data_train.dataset.img_folder = get_dataset_dir("tdt4265_2022_updated")
+-data_train.dataset.annotation_file = get_dataset_dir(
+-    "tdt4265_2022_updated/train_annotations.json")
+-data_val.dataset.img_folder = get_dataset_dir("tdt4265_2022_updated")
+-data_val.dataset.annotation_file = get_dataset_dir(
+-    "tdt4265_2022_updated/val_annotations.json")
+diff --git a/Project/src/model/configs/test_anchors/base.py b/Project/src/model/configs/test_anchors/base.py
+deleted file mode 100644
+index 0fecea0..0000000
+--- a/Project/src/model/configs/test_anchors/base.py
++++ /dev/null
+@@ -1,40 +0,0 @@
+-from ...modeling import AnchorBoxes
+-from utils.config import LazyCall as L
+-# The line belows inherits the configuration set for the tdt4265 dataset
+-from ..tdt4265 import (
+-    train,
+-    optimizer,
+-    schedulers,
+-    loss_objective,
+-    model,
+-    backbone,
+-    data_train,
+-    data_val,
+-    train_cpu_transform,
+-    val_cpu_transform,
+-    gpu_transform,
+-    label_map
+-)
+-
+-# The config below is copied from the ssd300.py model trained on images of size 300*300.
+-# The images in the tdt4265 dataset are of size 128 * 1024, so resizing to 300*300 is probably a bad idea
+-# Change the imshape to (128, 1024) and experiment with better prior boxes
+-train.imshape = (300, 300)
+-
+-
+-anchors = L(AnchorBoxes)(
+-    feature_sizes=[[32, 256], [16, 128], [8, 64], [4, 32], [2, 16], [1, 8]],
+-    # Strides is the number of pixels (in image space) between each spatial position in the feature map
+-    strides=[[4, 4], [8, 8], [16, 16], [32, 32], [64, 64], [128, 128]],
+-    min_sizes=[[16, 16], [32, 32], [48, 48], [
+-        64, 64], [86, 86], [128, 128], [128, 400]],
+-    # Strides is the number of pixels (in image space) between each spatial position in the feature map
+-    # aspect ratio is defined per feature map (first index is largest feature map (38x38))
+-    # aspect ratio is used to define two boxes per element in the list.
+-    # if ratio=[2], boxes will be created with ratio 1:2 and 2:1
+-    # Number of boxes per location is in total 2 + 2 per aspect ratio
+-    aspect_ratios=[[2], [2, 3], [2, 3], [2, 3], [2], [2]],
+-    image_shape="${train.imshape}",
+-    scale_center_variance=0.1,
+-    scale_size_variance=0.2
+-)
+diff --git a/Project/src/model/evaluate.py b/Project/src/model/evaluate.py
+deleted file mode 100644
+index b8386ce..0000000
+--- a/Project/src/model/evaluate.py
++++ /dev/null
+@@ -1,116 +0,0 @@
+-import torch
+-import tqdm
+-import numpy as np
+-import sys
+-import os
+-from pycocotools.cocoeval import COCOeval
+-from pycocotools.coco import COCO
+-
+-import utils
+-import tops
+-from tops import logger
+-
+-
+-def silent_evaluation(eval_object):
+-    """Runs coco evaluation without writing to screen
+-    """
+-    old_stdout = sys.stdout  # backup current stdout
+-    sys.stdout = open(os.devnull, "w")
+-
+-    eval_object.evaluate()
+-    eval_object.accumulate()
+-    eval_object.summarize()
+-
+-    sys.stdout = old_stdout  # reset old stdout
+-
+-
+-def calculate_class_aps(coco_gt, coco_dt, label_map):
+-    out_stats = {}
+-
+-    print("---------------------------------------------------")
+-    for index, class_name in label_map.items():
+-        eval_object = COCOeval(coco_gt, coco_dt, iouType='bbox')
+-        eval_object.params.catIds = [index]
+-        silent_evaluation(eval_object)
+-
+-        # We should consider changing this to MaP@iou=0.5
+-        ap_score = eval_object.stats[0]
+-
+-        extra_message = ""
+-        if ap_score == -1:
+-            extra_message = "(No objects of this class in validation set)"
+-
+-        if ap_score != -1:
+-            stat_key = f"AP_{class_name}"
+-            out_stats[stat_key] = ap_score
+-
+-        print("AP for class", class_name, "is",
+-              f"{eval_object.stats[0]:.4f}", extra_message)
+-
+-    return out_stats
+-
+-
+-@torch.no_grad()
+-def evaluate(
+-        model,
+-        dataloader: torch.utils.data.DataLoader,
+-        cocoGt: COCO,
+-        gpu_transform: torch.nn.Module,
+-        label_map):
+-    """
+-        Evaluates over dataloader and returns COCO stats
+-    """
+-    model.eval()
+-    ret = []
+-    for batch in tqdm.tqdm(dataloader, desc="Evaluating on dataset"):
+-        batch["image"] = tops.to_cuda(batch["image"])
+-        batch = gpu_transform(batch)
+-        with torch.cuda.amp.autocast(enabled=tops.AMP()):
+-            predictions = model(batch["image"], nms_iou_threshold=0.50, max_output=200,
+-                                score_threshold=0.05)
+-
+-        for idx in range(len(predictions)):
+-            boxes_ltrb, categories, scores = predictions[idx]
+-            # ease-of-use for specific predictions
+-            H, W = batch["height"][idx], batch["width"][idx]
+-            box_ltwh = utils.bbox_ltrb_to_ltwh(boxes_ltrb)
+-            box_ltwh[:, [0, 2]] *= W
+-            box_ltwh[:, [1, 3]] *= H
+-            box_ltwh, category, score = [x.cpu()
+-                                         for x in [box_ltwh, categories, scores]]
+-            img_id = batch["image_id"][idx].item()
+-            for b_ltwh, label_, prob_ in zip(box_ltwh, category, score):
+-                ret.append([img_id, *b_ltwh.tolist(), prob_.item(),
+-                            int(label_)])
+-    model.train()
+-    final_results = np.array(ret).astype(np.float32)
+-    if final_results.shape[0] == 0:
+-        logger.log(
+-            "WARNING! There were no predictions with score > 0.05. This indicates a bug in your code.")
+-        return dict()
+-    cocoDt = cocoGt.loadRes(final_results)
+-    E = COCOeval(cocoGt, cocoDt, iouType='bbox')
+-    E.params.areaRng = [[0 ** 2, 1e5 ** 2], [0 ** 2,
+-                                             16 ** 2], [16 ** 2, 32 ** 2], [32 ** 2, 1e5 ** 2]]
+-    E.evaluate()
+-    E.accumulate()
+-    E.summarize()
+-
+-    class_ap_stats = calculate_class_aps(cocoGt, cocoDt, label_map)
+-
+-    stats_all_objects = {
+-        "mAP": E.stats[0],  # same as mAP@
+-        "mAP@0.5": E.stats[1],  # Same as PASCAL VOC mAP
+-        "mAP@0.75": E.stats[2],
+-        "mAP_small": E.stats[3],
+-        "mAP_medium": E.stats[4],
+-        "mAP_large": E.stats[5],
+-        "average_recall@1": E.stats[6],
+-        "average_recall@10": E.stats[7],
+-        "average_recall@100": E.stats[8],
+-        "average_recall@100_small": E.stats[9],
+-        "average_recall@100_medium": E.stats[10],
+-        "average_recall@100_large": E.stats[11],
+-    }
+-
+-    return dict(stats_all_objects, **class_ap_stats)
+diff --git a/Project/src/model/model.py b/Project/src/model/model.py
+deleted file mode 100644
+index 430fc7e..0000000
+--- a/Project/src/model/model.py
++++ /dev/null
+@@ -1,47 +0,0 @@
+-import torch
+-from typing import Tuple, List
+-
+-
+-class BasicModel(torch.nn.Module):
+-    """
+-    This is a basic backbone for SSD.
+-    The feature extractor outputs a list of 6 feature maps, with the sizes:
+-    [shape(-1, output_channels[0], 38, 38),
+-     shape(-1, output_channels[1], 19, 19),
+-     shape(-1, output_channels[2], 10, 10),
+-     shape(-1, output_channels[3], 5, 5),
+-     shape(-1, output_channels[3], 3, 3),
+-     shape(-1, output_channels[4], 1, 1)]
+-    """
+-    def __init__(self,
+-            output_channels: List[int],
+-            image_channels: int,
+-            output_feature_sizes: List[Tuple[int]]):
+-        super().__init__()
+-        self.out_channels = output_channels
+-        self.output_feature_shape = output_feature_sizes
+-
+-    def forward(self, x):
+-        """
+-        The forward functiom should output features with shape:
+-            [shape(-1, output_channels[0], 38, 38),
+-            shape(-1, output_channels[1], 19, 19),
+-            shape(-1, output_channels[2], 10, 10),
+-            shape(-1, output_channels[3], 5, 5),
+-            shape(-1, output_channels[3], 3, 3),
+-            shape(-1, output_channels[4], 1, 1)]
+-        We have added assertion tests to check this, iteration through out_features,
+-        where out_features[0] should have the shape:
+-            shape(-1, output_channels[0], 38, 38),
+-        """
+-        out_features = []
+-        for idx, feature in enumerate(out_features):
+-            out_channel = self.out_channels[idx]
+-            h, w = self.output_feature_shape[idx]
+-            expected_shape = (out_channel, h, w)
+-            assert feature.shape[1:] == expected_shape, \
+-                f"Expected shape: {expected_shape}, got: {feature.shape[1:]} at output IDX: {idx}"
+-        assert len(out_features) == len(self.output_feature_shape),\
+-            f"Expected that the length of the outputted features to be: {len(self.output_feature_shape)}, but it was: {len(out_features)}"
+-        return tuple(out_features)
+-
+diff --git a/Project/src/model/modeling/__init__.py b/Project/src/model/modeling/__init__.py
+deleted file mode 100644
+index c4b841b..0000000
+--- a/Project/src/model/modeling/__init__.py
++++ /dev/null
+@@ -1,4 +0,0 @@
+-from .anchor_boxes import AnchorBoxes
+-from .anchor_encoder import AnchorEncoder
+-from .ssd_multibox_loss import SSDMultiboxLoss
+-from .ssd import SSD300
+diff --git a/Project/src/model/modeling/anchor_boxes.py b/Project/src/model/modeling/anchor_boxes.py
+deleted file mode 100644
+index 26b153d..0000000
+--- a/Project/src/model/modeling/anchor_boxes.py
++++ /dev/null
+@@ -1,76 +0,0 @@
+-# Modified from: https://github.com/lufficc/SSD
+-import torch
+-from typing import List
+-from math import sqrt
+-
+-# Note on center/size variance:
+-# This is used for endcoding/decoding the regressed coordinates from the SSD bounding box head to actual locations.
+-# It's a trick to improve gradients from bounding box regression. Take a look at this post about more info:
+-# https://leimao.github.io/blog/Bounding-Box-Encoding-Decoding/
+-class AnchorBoxes(object):
+-    def __init__(self, 
+-            image_shape: tuple, 
+-            feature_sizes: List[tuple], 
+-            min_sizes: List[int],
+-            strides: List[tuple],
+-            aspect_ratios: List[int],
+-            scale_center_variance: float,
+-            scale_size_variance: float):
+-        """Generate SSD anchors Boxes.
+-            It returns the center, height and width of the anchors. The values are relative to the image size
+-            Args:
+-                image_shape: tuple of (image height, width)
+-                feature_sizes: each tuple in the list is the feature shape outputted by the backbone (H, W)
+-            Returns:
+-                anchors (num_priors, 4): The prior boxes represented as [[center_x, center_y, w, h]]. All the values
+-                    are relative to the image size.
+-        """
+-        self.scale_center_variance = scale_center_variance
+-        self.scale_size_variance = scale_size_variance
+-        self.num_boxes_per_fmap = [2 + 2*len(ratio) for ratio in aspect_ratios]
+-        # Calculation method slightly different from paper
+-
+-        anchors = []
+-        # size of feature and number of feature
+-        for fidx, [fH, fW] in enumerate(feature_sizes):
+-            bbox_sizes = []
+-            h_min = min_sizes[fidx][0] / image_shape[0]
+-            w_min = min_sizes[fidx][1] / image_shape[1]
+-            bbox_sizes.append((w_min, h_min))
+-            h_max = sqrt(min_sizes[fidx][0]*min_sizes[fidx+1][0]) / image_shape[0]
+-            w_max = sqrt(min_sizes[fidx][1]*min_sizes[fidx+1][1]) / image_shape[1]
+-            bbox_sizes.append((w_max, h_max))
+-            for r in aspect_ratios[fidx]:
+-                h = h_min*sqrt(r)
+-                w = w_min/sqrt(r)
+-                bbox_sizes.append((h_min*sqrt(r), w_min/sqrt(r)))
+-                bbox_sizes.append((h_min/sqrt(r), w_min*sqrt(r)))
+-            scale_y = image_shape[0] / strides[fidx][0]
+-            scale_x = image_shape[1] / strides[fidx][1]
+-            for w, h in bbox_sizes:
+-                for i in range(fH):
+-                    for j in range(fW):
+-                        cx = (j + 0.5)/scale_x
+-                        cy = (i + 0.5)/scale_y
+-                        anchors.append((cx, cy, w, h))
+-
+-        self.anchors_xywh = torch.tensor(anchors).clamp(min=0, max=1).float()
+-        self.anchors_ltrb = self.anchors_xywh.clone()
+-        self.anchors_ltrb[:, 0] = self.anchors_xywh[:, 0] - 0.5 * self.anchors_xywh[:, 2]
+-        self.anchors_ltrb[:, 1] = self.anchors_xywh[:, 1] - 0.5 * self.anchors_xywh[:, 3]
+-        self.anchors_ltrb[:, 2] = self.anchors_xywh[:, 0] + 0.5 * self.anchors_xywh[:, 2]
+-        self.anchors_ltrb[:, 3] = self.anchors_xywh[:, 1] + 0.5 * self.anchors_xywh[:, 3]
+-
+-    def __call__(self, order):
+-        if order == "ltrb":
+-            return self.anchors_ltrb
+-        if order == "xywh":
+-            return self.anchors_xywh
+-
+-    @property
+-    def scale_xy(self):
+-        return self.scale_center_variance
+-
+-    @property
+-    def scale_wh(self):
+-        return self.scale_size_variance
+\ No newline at end of file
+diff --git a/Project/src/model/modeling/anchor_encoder.py b/Project/src/model/modeling/anchor_encoder.py
+deleted file mode 100644
+index 5b4d845..0000000
+--- a/Project/src/model/modeling/anchor_encoder.py
++++ /dev/null
+@@ -1,113 +0,0 @@
+-# Modified from: https://github.com/NVIDIA/DeepLearningExamples/tree/master/PyTorch/Detection/SSD/
+-import torch
+-import torch.nn.functional as F
+-from typing import Optional
+-
+-import utils
+-import model.tops as tops
+-
+-
+-def calc_iou_tensor(box1_ltrb, box2_ltrb):
+-    """ Calculation of IoU based on two boxes tensor,
+-        Reference to https://github.com/kuangliu/pytorch-src
+-        input:
+-            box1 (N, 4)
+-            box2 (M, 4)
+-        output:
+-            IoU (N, M)
+-    """
+-
+-    N = box1_ltrb.size(0)
+-    M = box2_ltrb.size(0)
+-
+-    be1 = box1_ltrb.unsqueeze(1).expand(-1, M, -1)
+-    be2 = box2_ltrb.unsqueeze(0).expand(N, -1, -1)
+-
+-    lt = torch.max(be1[:, :, :2], be2[:, :, :2])
+-    rb = torch.min(be1[:, :, 2:], be2[:, :, 2:])
+-
+-    delta = rb - lt
+-    delta[delta < 0] = 0
+-    intersect = delta[:, :, 0]*delta[:, :, 1]
+-
+-    delta1 = be1[:, :, 2:] - be1[:, :, :2]
+-    area1 = delta1[:, :, 0]*delta1[:, :, 1]
+-    delta2 = be2[:, :, 2:] - be2[:, :, :2]
+-    area2 = delta2[:, :, 0]*delta2[:, :, 1]
+-
+-    iou = intersect/(area1 + area2 - intersect)
+-    return iou
+-
+-# This function is from https://github.com/kuangliu/pytorch-ssd.
+-
+-
+-class AnchorEncoder(object):
+-    """
+-        Transfer between (bboxes, labels) <-> SSD Output
+-    """
+-
+-    def __init__(self, anchors):
+-        self.anchors = anchors(order="ltrb")
+-        self.anchors_xywh = tops.to_cuda(
+-            anchors(order="xywh").unsqueeze(dim=0))
+-        self.nboxes = self.anchors.size(0)
+-        self.scale_xy = anchors.scale_xy
+-        self.scale_wh = anchors.scale_wh
+-
+-    def encode(self, bboxes_in: torch.Tensor, labels_in: torch.Tensor, iou_threshold: float):
+-        """
+-            Encode ground truth boxes and targets to anchors.
+-            Each ground truth is assigned to at least 1 anchor and
+-            each anchor is assigned to every ground truth if IoU threshold is met.
+-
+-            Args:
+-                bboxes_in (num_targets, 4): ground truth boxes.
+-                labels_in (num_targets): labels of targets.
+-                iou_criteria: IoU threshold required to match a GT box to anchor
+-            Returns:
+-                boxes (num_priors, 4): real values for priors.
+-                labels (num_priros): labels for priors.
+-        """
+-        ious = calc_iou_tensor(bboxes_in, self.anchors)
+-        #ious: shape [batch_size, num_anchors]
+-        best_target_per_anchor, best_target_per_anchor_idx = ious.max(dim=0)
+-        best_anchor_per_target, best_anchor_per_target_idx = ious.max(dim=1)
+-
+-        # 2.0 is used to make sure every target has a prior assigned
+-        best_target_per_anchor.index_fill_(0, best_anchor_per_target_idx, 2.0)
+-
+-        idx = torch.arange(
+-            0, best_anchor_per_target_idx.size(0), dtype=torch.int64)
+-        best_target_per_anchor_idx[best_anchor_per_target_idx[idx]] = idx
+-
+-        # filter IoU > 0.5
+-        masks = best_target_per_anchor > iou_threshold
+-        labels_out = torch.zeros(self.nboxes, dtype=torch.long)
+-        labels_out[masks] = labels_in[best_target_per_anchor_idx[masks]]
+-        bboxes_out = self.anchors.clone()
+-        bboxes_out[masks, :] = bboxes_in[best_target_per_anchor_idx[masks], :]
+-        # Transform format to xywh format
+-        bboxes_out = utils.bbox_ltrb_to_center(bboxes_out)
+-        return bboxes_out, labels_out
+-
+-    def decode_output(self, bbox_delta: torch.Tensor, confs_in: Optional[torch.Tensor]):
+-        """
+-            Decodes SSD bbox delta/confidences to ltrb boxes.
+-            bbox_delta: [batch_size, 4, num_anchors], in center form (xywh)
+-            confs_in: [batch_size, num_classes, num_anchors]
+-        """
+-        bbox_delta = bbox_delta.permute(0, 2, 1)
+-
+-        bbox_delta[:, :, :2] = self.scale_xy*bbox_delta[:, :, :2]
+-        bbox_delta[:, :, 2:] = self.scale_wh*bbox_delta[:, :, 2:]
+-
+-        bbox_delta[:, :, :2] = bbox_delta[:, :, :2] * \
+-            self.anchors_xywh[:, :, 2:] + self.anchors_xywh[:, :, :2]
+-        bbox_delta[:, :, 2:] = bbox_delta[:, :,
+-                                          2:].exp()*self.anchors_xywh[:, :, 2:]
+-
+-        boxes_ltrb = utils.bbox_center_to_ltrb(bbox_delta)
+-        if confs_in is not None:
+-            confs_in = confs_in.permute(0, 2, 1)
+-            confs_in = F.softmax(confs_in, dim=-1)
+-        return boxes_ltrb, confs_in
+diff --git a/Project/src/model/modeling/ssd.py b/Project/src/model/modeling/ssd.py
+deleted file mode 100644
+index 164bcac..0000000
+--- a/Project/src/model/modeling/ssd.py
++++ /dev/null
+@@ -1,110 +0,0 @@
+-import torch
+-import torch.nn as nn
+-from .anchor_encoder import AnchorEncoder
+-from torchvision.ops import batched_nms
+-
+-
+-class SSD300(nn.Module):
+-    def __init__(self, 
+-            feature_extractor: nn.Module,
+-            anchors,
+-            loss_objective,
+-            num_classes: int):
+-        super().__init__()
+-        """
+-            Implements the SSD network.
+-            Backbone outputs a list of features, which are gressed to SSD output with regression/classification heads.
+-        """
+-
+-        self.feature_extractor = feature_extractor
+-        self.loss_func = loss_objective
+-        self.num_classes = num_classes
+-        self.regression_heads = []
+-        self.classification_heads = []
+-
+-        # Initialize output heads that are applied to each feature map from the backbone.
+-        for n_boxes, out_ch in zip(anchors.num_boxes_per_fmap, self.feature_extractor.out_channels):
+-            self.regression_heads.append(nn.Conv2d(out_ch, n_boxes * 4, kernel_size=3, padding=1))
+-            self.classification_heads.append(nn.Conv2d(out_ch, n_boxes * self.num_classes, kernel_size=3, padding=1))
+-
+-        self.regression_heads = nn.ModuleList(self.regression_heads)
+-        self.classification_heads = nn.ModuleList(self.classification_heads)
+-        self.anchor_encoder = AnchorEncoder(anchors)
+-        self._init_weights()
+-
+-    def _init_weights(self):
+-        layers = [*self.regression_heads, *self.classification_heads]
+-        for layer in layers:
+-            for param in layer.parameters():
+-                if param.dim() > 1: nn.init.xavier_uniform_(param)
+-
+-    def regress_boxes(self, features):
+-        locations = []
+-        confidences = []
+-        for idx, x in enumerate(features):
+-            bbox_delta = self.regression_heads[idx](x).view(x.shape[0], 4, -1)
+-            bbox_conf = self.classification_heads[idx](x).view(x.shape[0], self.num_classes, -1)
+-            locations.append(bbox_delta)
+-            confidences.append(bbox_conf)
+-        bbox_delta = torch.cat(locations, 2).contiguous()
+-        confidences = torch.cat(confidences, 2).contiguous()
+-        return bbox_delta, confidences
+-
+-    
+-    def forward(self, img: torch.Tensor, **kwargs):
+-        """
+-            img: shape: NCHW
+-        """
+-        if not self.training:
+-            return self.forward_test(img, **kwargs)
+-        features = self.feature_extractor(img)
+-        return self.regress_boxes(features)
+-    
+-    def forward_test(self,
+-            img: torch.Tensor,
+-            imshape=None,
+-            nms_iou_threshold=0.5, max_output=200, score_threshold=0.05):
+-        """
+-            img: shape: NCHW
+-            nms_iou_threshold, max_output is only used for inference/evaluation, not for training
+-        """
+-        features = self.feature_extractor(img)
+-        bbox_delta, confs = self.regress_boxes(features)
+-        boxes_ltrb, confs = self.anchor_encoder.decode_output(bbox_delta, confs)
+-        predictions = []
+-        for img_idx in range(boxes_ltrb.shape[0]):
+-            boxes, categories, scores = filter_predictions(
+-                boxes_ltrb[img_idx], confs[img_idx],
+-                nms_iou_threshold, max_output, score_threshold)
+-            if imshape is not None:
+-                H, W = imshape
+-                boxes[:, [0, 2]] *= H
+-                boxes[:, [1, 3]] *= W
+-            predictions.append((boxes, categories, scores))
+-        return predictions
+-
+- 
+-def filter_predictions(
+-        boxes_ltrb: torch.Tensor, confs: torch.Tensor,
+-        nms_iou_threshold: float, max_output: int, score_threshold: float):
+-        """
+-            boxes_ltrb: shape [N, 4]
+-            confs: shape [N, num_classes]
+-        """
+-        assert 0 <= nms_iou_threshold <= 1
+-        assert max_output > 0
+-        assert 0 <= score_threshold <= 1
+-        scores, category = confs.max(dim=1)
+-
+-        # 1. Remove low confidence boxes / background boxes
+-        mask = (scores > score_threshold).logical_and(category != 0)
+-        boxes_ltrb = boxes_ltrb[mask]
+-        scores = scores[mask]
+-        category = category[mask]
+-
+-        # 2. Perform non-maximum-suppression
+-        keep_idx = batched_nms(boxes_ltrb, scores, category, iou_threshold=nms_iou_threshold)
+-
+-        # 3. Only keep max_output best boxes (NMS returns indices in sorted order, decreasing w.r.t. scores)
+-        keep_idx = keep_idx[:max_output]
+-        return boxes_ltrb[keep_idx], category[keep_idx], scores[keep_idx]
+\ No newline at end of file
+diff --git a/Project/src/model/modeling/ssd_multibox_loss.py b/Project/src/model/modeling/ssd_multibox_loss.py
+deleted file mode 100644
+index 424a40d..0000000
+--- a/Project/src/model/modeling/ssd_multibox_loss.py
++++ /dev/null
+@@ -1,84 +0,0 @@
+-import torch.nn as nn
+-import torch
+-import math
+-import torch.nn.functional as F
+-
+-def hard_negative_mining(loss, labels, neg_pos_ratio):
+-    """
+-    It used to suppress the presence of a large number of negative prediction.
+-    It works on image level not batch level.
+-    For any example/image, it keeps all the positive predictions and
+-     cut the number of negative predictions to make sure the ratio
+-     between the negative examples and positive examples is no more
+-     the given ratio for an image.
+-    Args:
+-        loss (N, num_priors): the loss for each example.
+-        labels (N, num_priors): the labels.
+-        neg_pos_ratio:  the ratio between the negative examples and positive examples.
+-    """
+-    pos_mask = labels > 0
+-    num_pos = pos_mask.long().sum(dim=1, keepdim=True)
+-    num_neg = num_pos * neg_pos_ratio
+-
+-    loss[pos_mask] = -math.inf
+-    _, indexes = loss.sort(dim=1, descending=True)
+-    _, orders = indexes.sort(dim=1)
+-    neg_mask = orders < num_neg
+-    return pos_mask | neg_mask
+-
+-
+-class SSDMultiboxLoss(nn.Module):
+-    """
+-        Implements the loss as the sum of the followings:
+-        1. Confidence Loss: All labels, with hard negative mining
+-        2. Localization Loss: Only on positive labels
+-        Suppose input dboxes has the shape 8732x4
+-    """
+-    def __init__(self, anchors):
+-        super().__init__()
+-        self.scale_xy = 1.0/anchors.scale_xy
+-        self.scale_wh = 1.0/anchors.scale_wh
+-
+-        self.sl1_loss = nn.SmoothL1Loss(reduction='none')
+-        self.anchors = nn.Parameter(anchors(order="xywh").transpose(0, 1).unsqueeze(dim = 0),
+-            requires_grad=False)
+-
+-
+-    def _loc_vec(self, loc):
+-        """
+-            Generate Location Vectors
+-        """
+-        gxy = self.scale_xy*(loc[:, :2, :] - self.anchors[:, :2, :])/self.anchors[:, 2:, ]
+-        gwh = self.scale_wh*(loc[:, 2:, :]/self.anchors[:, 2:, :]).log()
+-        return torch.cat((gxy, gwh), dim=1).contiguous()
+-    
+-    def forward(self,
+-            bbox_delta: torch.FloatTensor, confs: torch.FloatTensor,
+-            gt_bbox: torch.FloatTensor, gt_labels: torch.LongTensor):
+-        """
+-        NA is the number of anchor boxes (by default this is 8732)
+-            bbox_delta: [batch_size, 4, num_anchors]
+-            confs: [batch_size, num_classes, num_anchors]
+-            gt_bbox: [batch_size, num_anchors, 4]
+-            gt_label = [batch_size, num_anchors]
+-        """
+-        gt_bbox = gt_bbox.transpose(1, 2).contiguous() # reshape to [batch_size, 4, num_anchors]
+-        with torch.no_grad():
+-            to_log = - F.log_softmax(confs, dim=1)[:, 0]
+-            mask = hard_negative_mining(to_log, gt_labels, 3.0)
+-        classification_loss = F.cross_entropy(confs, gt_labels, reduction="none")
+-        classification_loss = classification_loss[mask].sum()
+-
+-        pos_mask = (gt_labels > 0).unsqueeze(1).repeat(1, 4, 1)
+-        bbox_delta = bbox_delta[pos_mask]
+-        gt_locations = self._loc_vec(gt_bbox)
+-        gt_locations = gt_locations[pos_mask]
+-        regression_loss = F.smooth_l1_loss(bbox_delta, gt_locations, reduction="sum")
+-        num_pos = gt_locations.shape[0]/4
+-        total_loss = regression_loss/num_pos + classification_loss/num_pos
+-        to_log = dict(
+-            regression_loss=regression_loss/num_pos,
+-            classification_loss=classification_loss/num_pos,
+-            total_loss=total_loss
+-        )
+-        return total_loss, to_log
+diff --git a/Project/src/model/tops/__init__.py b/Project/src/model/tops/__init__.py
+deleted file mode 100644
+index e69de29..0000000
+diff --git a/Project/src/model/tops/build.py b/Project/src/model/tops/build.py
+deleted file mode 100644
+index 3806dd7..0000000
+--- a/Project/src/model/tops/build.py
++++ /dev/null
+@@ -1,22 +0,0 @@
+-from os import PathLike
+-from typing import Optional
+-from .logger.logger import init as _init_logger
+-from .checkpointer.checkpointer import init as init_checkpointer
+-from pathlib import Path
+-from ...utils.git_diff import dump_git_diff
+-
+-
+-def init(
+-    output_dir,
+-    logging_backend=["stdout", "json", "tensorboard"],
+-    checkpoint_dir: Optional[PathLike] = None
+-):
+-    """
+-    """
+-    output_dir = Path(output_dir)
+-    output_dir.mkdir(exist_ok=True, parents=True)
+-    _init_logger(output_dir.joinpath("logs"), logging_backend)
+-    if checkpoint_dir is None:
+-        checkpoint_dir = output_dir.joinpath("checkpoints")
+-    init_checkpointer(checkpoint_dir)
+-    dump_git_diff(output_dir)
+diff --git a/Project/src/model/tops/checkpointer.py b/Project/src/model/tops/checkpointer.py
+deleted file mode 100644
+index 25700f6..0000000
+--- a/Project/src/model/tops/checkpointer.py
++++ /dev/null
+@@ -1,118 +0,0 @@
+-import os
+-import torch
+-import pathlib
+-from ..logger import global_step, log, logger
+-from typing import List, Optional
+-from argparse import ArgumentError
+-
+-_checkpoint_dir = None
+-_models = None
+-
+-def init(checkpoint_dir: pathlib.Path):
+-    global _checkpoint_dir
+-    _checkpoint_dir = checkpoint_dir
+-
+-
+-def load_checkpoint(
+-        checkpoint_path: Optional[os.PathLike] = None,
+-        load_best: bool = False,
+-        map_location=None) -> dict:
+-    if map_location is None:
+-        map_location = f"cuda:0" if torch.cuda.is_available() else "cpu"
+-    if checkpoint_path is None:
+-        checkpoint_path = _checkpoint_dir
+-        if _checkpoint_dir is None:
+-            raise ArgumentError(
+-                "Both the provided checkpoint_path and global checkpoint_dir is None." +
+-                "You have to initialize mlops or provide a checkpoint.")
+-    checkpoint_path = pathlib.Path(checkpoint_path)
+-    if checkpoint_path.is_file():
+-        ckpt = torch.load(checkpoint_path, map_location=map_location)
+-        log(f"Loaded checkpoint from {checkpoint_path}")
+-        return ckpt
+-    checkpoint_dir = checkpoint_path
+-    if load_best:
+-        checkpoint_path = checkpoint_dir.joinpath("best_model.ckpt")
+-    else:
+-        if not checkpoint_dir.is_dir():
+-            raise FileNotFoundError(f"No checkpoint folder exists in: {checkpoint_dir.absolute()}")
+-        
+-        checkpoints = get_ckpt_paths(checkpoint_dir)
+-        if len(checkpoints) == 0:
+-            raise FileNotFoundError(f"No checkpoints in folder: {checkpoint_path}")
+-        checkpoint_path = checkpoints[-1]
+-    assert checkpoint_path.is_file(), "This should not be reachable."
+-    if not checkpoint_path.is_file():
+-        raise FileNotFoundError(f"Did not find file: {checkpoint_path}")
+-    ckpt = torch.load(checkpoint_path, map_location=map_location)
+-    log(f"Loaded checkpoint from {checkpoint_path}")
+-    return ckpt
+-
+-def get_ckpt_paths(checkpoint_dir: pathlib.Path) -> List[pathlib.Path]:
+-    checkpoint_dir.mkdir(exist_ok=True, parents=True)
+-    checkpoints = [x for x in checkpoint_dir.glob("*.ckpt") if x.stem != "best_model"]
+-    checkpoints.sort(key=lambda x: int(x.stem.split("_")[-1]))
+-    return checkpoints
+-
+-
+-def save_checkpoint(
+-        state_dict: dict,
+-        checkpoint_dir: Optional[os.PathLike] = None,
+-        is_best: bool = False,
+-        max_keep=1) -> None:
+-    """
+-    Args:
+-        checkpoint_path: path to file or folder.
+-    """
+-    if checkpoint_dir is None:
+-        assert _checkpoint_dir is not None
+-        checkpoint_dir = _checkpoint_dir
+-    checkpoint_dir.parent.mkdir(exist_ok=True, parents=True)
+-    previous_checkpoint_paths = get_ckpt_paths(checkpoint_dir)
+-    if is_best:
+-        torch.save(state_dict, checkpoint_dir.joinpath("best_model.ckpt"))
+-        log(f"Saved model to: {checkpoint_dir.joinpath('best_model.ckpt')}" )
+-    checkpoint_path = checkpoint_dir.joinpath(f"{global_step()}.ckpt")
+-    if checkpoint_path.is_file():
+-        return
+-    torch.save(state_dict, checkpoint_path)
+-    log(f"Saved model to: {checkpoint_path}")
+-    if len(previous_checkpoint_paths) > max_keep:
+-        previous_checkpoint_paths[0].unlink()
+-
+-
+-def has_checkpoint(checkpoint_dir: Optional[os.PathLike] = None) -> bool:
+-    if checkpoint_dir is None:
+-        assert _checkpoint_dir is not None
+-        checkpoint_dir = _checkpoint_dir
+-    checkpoint_dir = pathlib.Path(checkpoint_dir)
+-    num_checkpoints = len(list(checkpoint_dir.glob("*.ckpt")))
+-    return num_checkpoints > 0
+-
+-
+-def register_models(models: dict):
+-    global _models
+-    for key, model in models.items():
+-        if not hasattr(model, "state_dict"):
+-            raise ArgumentError("The model has to have a state_dict")
+-        if not hasattr(model, "load_state_dict"):
+-            raise ArgumentError("The model has to have load_state_dict")
+-    _models = models
+-
+-
+-def save_registered_models(other_state: dict = None, **kwargs):
+-    assert _models is not None
+-    state_dict = {key: model.state_dict() for key, model in _models.items()}
+-    if other_state:
+-        assert all(key not in state_dict for key in other_state)
+-        state_dict.update(other_state)
+-    save_checkpoint(state_dict, **kwargs)
+-    logger._write_metadata()
+-
+-def load_registered_models(**kwargs):
+-    assert _models is not None
+-    state_dict = load_checkpoint(**kwargs)
+-    for key, state in state_dict.items():
+-        if key in _models:
+-            _models[key].load_state_dict(state)
+-    return {k: v for k,v in state_dict.items() if key not in _models}
+\ No newline at end of file
+diff --git a/Project/src/model/tops/logger.py b/Project/src/model/tops/logger.py
+deleted file mode 100644
+index 7e2ea71..0000000
+--- a/Project/src/model/tops/logger.py
++++ /dev/null
+@@ -1,206 +0,0 @@
+-import atexit
+-import json
+-import logging
+-from abc import ABC, abstractmethod
+-from argparse import ArgumentError
+-from pathlib import Path
+-import pathlib
+-from typing import List
+-from torch.utils import tensorboard
+-
+-_global_step = 0
+-_epoch = 0
+-
+-
+-INFO = logging.INFO
+-WARN = logging.WARN
+-DEBUG = logging.DEBUG
+-supported_backends = ["stdout", "json", "tensorboard"]
+-_output_dir = None
+-
+-DEFAULT_SCALAR_LEVEL = DEBUG
+-DEFAULT_LOG_LEVEL = INFO
+-DEFAULT_LOGGER_LEVEL = INFO
+-
+-class Backend(ABC):
+-
+-    @abstractmethod
+-    def __init__(self):
+-        pass
+-
+-    @abstractmethod
+-    def add_scalar(self, tag, value, **kwargs):
+-        pass
+-
+-    def add_dict(self, values, **kwargs):
+-        for tag, value in values.items():
+-            self.add_scalar(tag, value, **kwargs)
+-
+-    def log(self, msg, level):
+-        pass
+-
+-    def finish(self):
+-        pass
+-
+-
+-class TensorBoardBackend(Backend):
+-
+-    def __init__(self, output_dir: Path):
+-        output_dir.mkdir(exist_ok=True, parents=True)
+-        self.writer = tensorboard.SummaryWriter(log_dir=output_dir)
+-        self.closed = False
+-    
+-    def add_scalar(self, tag, value, **kwargs):
+-        self.writer.add_scalar(tag, value, new_style=True, global_step=_global_step)
+-
+-
+-    def finish(self):
+-        if self.closed:
+-            return
+-        self.closed = True
+-        self.writer.flush()
+-        self.writer.close()
+-
+-
+-class StdOutBackend(Backend):
+-
+-    def __init__(self, filepath: Path, print_to_file=True) -> None:
+-        logFormatter = logging.Formatter("%(asctime)s [%(levelname)-5.5s] %(message)s")
+-        self.rootLogger = logging.getLogger()
+-        self.rootLogger.setLevel(DEFAULT_LOGGER_LEVEL)
+-
+-        self.consoleHandler = logging.StreamHandler()
+-        self.consoleHandler.setFormatter(logFormatter)
+-        self.print_to_file = print_to_file
+-        if self.print_to_file:
+-            self.file_handler = logging.FileHandler(filepath)
+-            self.file_handler.setFormatter(logFormatter)
+-            self.rootLogger.addHandler(self.file_handler)
+-        self.rootLogger.addHandler(self.consoleHandler)
+-        self.closed = False
+-    
+-    def add_scalar(self, tag, value, level):
+-        msg = f"{tag}: {value}"
+-        self.rootLogger.log(level, msg)
+-    
+-    def add_dict(self, values, level):
+-        msg = ""
+-        for tag, value in values.items():
+-            msg += f"{tag}: {value:.3f}, "
+-        self.rootLogger.log(level, msg)
+-    
+-    def log(self, msg, level):
+-        self.rootLogger.log(level, msg)
+-    
+-    def finish(self):
+-        if self.closed:
+-            return
+-        self.closed = True
+-        if self.print_to_file:
+-            self.file_handler.flush()
+-            self.file_handler.close()
+-            self.rootLogger.removeHandler(self.file_handler)
+-        self.rootLogger.removeHandler(self.consoleHandler)
+-        self.consoleHandler.close()
+-
+-class JSONBackend(Backend):
+-
+-    def __init__(self, filepath: Path) -> None:
+-        self.file = open(filepath, "a")
+-        self.closed = False
+-    
+-    def add_scalar(self, tag, value, **kwargs):
+-        self.add_dict({tag: value})
+-    
+-    def add_dict(self, values, **kwargs):
+-        values = {**values, "global_step":_global_step}
+-        values_str = json.dumps(values) + "\n"
+-        self.file.write(values_str)
+-    
+-    def finish(self):
+-        if self.closed:
+-            return
+-        self.closed = True
+-        self.file.flush()
+-        self.file.close()
+-
+-
+-_backends: List[Backend] = [StdOutBackend(None, False)]
+-
+-def init(output_dir, backends):
+-    global _backends, _output_dir
+-    for backend in _backends:
+-        backend.finish()
+-    output_dir = Path(output_dir)
+-    output_dir.mkdir(exist_ok=True, parents=True)
+-    _output_dir = output_dir
+-    _resume()
+-    _write_metadata()
+-    _backends = []
+-    for backend in backends:
+-        if backend not in supported_backends:
+-             raise ArgumentError(f"{backend} not in supported. Has to be one of: {', '.join(backends)}")
+-        if backend == "stdout":
+-            _backends.append(StdOutBackend(output_dir.joinpath("log.txt")))
+-        if backend == "tensorboard":
+-            _backends.append(TensorBoardBackend(output_dir.joinpath("tensorboard")))
+-        if backend == "json":
+-            _backends.append(JSONBackend(output_dir.joinpath("scalars.json")))
+-    atexit.register(finish)
+-
+-
+-def log(msg, level=DEFAULT_LOG_LEVEL):
+-    for backend in _backends:
+-        backend.log(msg, level)
+-
+-def add_scalar(tag, value, level=DEFAULT_SCALAR_LEVEL):
+-    for backend in _backends:
+-        backend.add_scalar(tag, value, level=level)
+-
+-def add_dict(values: dict, level=DEFAULT_SCALAR_LEVEL):
+-    for backend in _backends:
+-        backend.add_dict(values, level=level)
+-
+-
+-def finish():
+-    _write_metadata()
+-    for backend in _backends:
+-        backend.finish()
+-
+-
+-def step():
+-    global _global_step
+-    _global_step += 1
+-
+-def step_epoch():
+-    global _epoch
+-    _epoch += 1
+-
+-def _write_metadata():
+-    with open(_output_dir.joinpath("metadata.json"), "w") as fp:
+-        json.dump(dict(global_step=_global_step, epoch=_epoch), fp)
+-
+-def _resume():
+-    global _epoch, _global_step
+-    metadata_path = _output_dir.joinpath("metadata.json")
+-    if not metadata_path.is_file():
+-        return
+-    with open(metadata_path, "r") as fp:
+-        data = json.load(fp)
+-    _epoch = data["epoch"]
+-    _global_step = data["global_step"]
+-
+-def epoch():
+-    return _epoch
+-
+-def global_step():
+-    return _global_step
+-
+-
+-def read_logs(output_dir: pathlib.Path):
+-    log_path = output_dir.joinpath("logs","scalars.json")
+-    if not log_path.is_file():
+-        raise FileNotFoundError(f"Missing log file: {log_path}")
+-    with open(log_path, "r") as fp:
+-        log_entries = fp.readlines()
+-    return [json.loads(s) for s in log_entries]
+diff --git a/Project/src/model/tops/misc.py b/Project/src/model/tops/misc.py
+deleted file mode 100644
+index 4cd8d15..0000000
+--- a/Project/src/model/tops/misc.py
++++ /dev/null
+@@ -1,76 +0,0 @@
+-import torch
+-from easydict import EasyDict
+-
+-def print_module_summary(module, inputs, max_nesting=3, skip_redundant=True):
+-    # Adapted from: https://github.com/NVlabs/stylegan3
+-    assert isinstance(module, torch.nn.Module)
+-    assert not isinstance(module, torch.jit.ScriptModule)
+-
+-    # Register hooks.
+-    entries = []
+-    nesting = [0]
+-    def pre_hook(_mod, _inputs):
+-        nesting[0] += 1
+-    def post_hook(mod, _inputs, outputs):
+-        nesting[0] -= 1
+-        if nesting[0] <= max_nesting:
+-            outputs = list(outputs) if isinstance(outputs, (tuple, list)) else [outputs]
+-            outputs = [t for t in outputs if isinstance(t, torch.Tensor)]
+-            entries.append(EasyDict(mod=mod, outputs=outputs))
+-    hooks = [mod.register_forward_pre_hook(pre_hook) for mod in module.modules()]
+-    hooks += [mod.register_forward_hook(post_hook) for mod in module.modules()]
+-
+-    # Run module.
+-    if isinstance(inputs, dict):
+-        outputs = module(**inputs)
+-    else:
+-        assert isinstance(inputs, (tuple, list))
+-        outputs = module(*inputs)
+-    for hook in hooks:
+-        hook.remove()
+-
+-    # Identify unique outputs, parameters, and buffers.
+-    tensors_seen = set()
+-    for e in entries:
+-        e.unique_params = [t for t in e.mod.parameters() if id(t) not in tensors_seen]
+-        e.unique_buffers = [t for t in e.mod.buffers() if id(t) not in tensors_seen]
+-        e.unique_outputs = [t for t in e.outputs if id(t) not in tensors_seen]
+-        tensors_seen |= {id(t) for t in e.unique_params + e.unique_buffers + e.unique_outputs}
+-
+-    # Filter out redundant entries.
+-    if skip_redundant:
+-        entries = [e for e in entries if len(e.unique_params) or len(e.unique_buffers) or len(e.unique_outputs)]
+-
+-    # Construct table.
+-    rows = [[type(module).__name__, 'Parameters', 'Buffers', 'Output shape', 'Datatype']]
+-    rows += [['---'] * len(rows[0])]
+-    param_total = 0
+-    buffer_total = 0
+-    submodule_names = {mod: name for name, mod in module.named_modules()}
+-    for e in entries:
+-        name = '<top-level>' if e.mod is module else submodule_names[e.mod]
+-        param_size = sum(t.numel() for t in e.unique_params)
+-        buffer_size = sum(t.numel() for t in e.unique_buffers)
+-        output_shapes = [str(list(e.outputs[0].shape)) for t in e.outputs]
+-        output_dtypes = [str(t.dtype).split('.')[-1] for t in e.outputs]
+-        rows += [[
+-            name + (':0' if len(e.outputs) >= 2 else ''),
+-            str(param_size) if param_size else '-',
+-            str(buffer_size) if buffer_size else '-',
+-            (output_shapes + ['-'])[0],
+-            (output_dtypes + ['-'])[0],
+-        ]]
+-        for idx in range(1, len(e.outputs)):
+-            rows += [[name + f':{idx}', '-', '-', output_shapes[idx], output_dtypes[idx]]]
+-        param_total += param_size
+-        buffer_total += buffer_size
+-    rows += [['---'] * len(rows[0])]
+-    rows += [['Total', str(param_total), str(buffer_total), '-', '-']]
+-
+-    # Print table.
+-    widths = [max(len(cell) for cell in column) for column in zip(*rows)]
+-    print()
+-    for row in rows:
+-        print('  '.join(cell + ' ' * (width - len(cell)) for cell, width in zip(row, widths)))
+-    print()
+-    return outputs
+diff --git a/Project/src/model/train.py b/Project/src/model/train.py
+deleted file mode 100644
+index f10cfb7..0000000
+--- a/Project/src/model/train.py
++++ /dev/null
+@@ -1,132 +0,0 @@
+-from omegaconf import OmegaConf
+-from torch.optim.lr_scheduler import ChainedScheduler
+-from pathlib import Path
+-import tqdm
+-import pprint
+-import torch
+-import click
+-import time
+-import functools
+-import sys
+-
+-import tops
+-import utils
+-from evaluate import evaluate
+-from utils.config import instantiate
+-from tops import logger, checkpointer
+-
+-
+-assert sys.version_info >= (3, 7), "This code requires python version >= 3.7"
+-torch.backends.cudnn.benchmark = True
+-
+-
+-def train_epoch(
+-        model, scaler: torch.cuda.amp.GradScaler,
+-        optim, dataloader_train, scheduler,
+-        gpu_transform: torch.nn.Module,
+-        log_interval: int):
+-    grad_scale = scaler.get_scale()
+-    for batch in tqdm.tqdm(dataloader_train, f"Epoch {logger.epoch()}"):
+-        batch = tops.to_cuda(batch)
+-        batch["labels"] = batch["labels"].long()
+-        batch = gpu_transform(batch)
+-
+-        with torch.cuda.amp.autocast(enabled=tops.AMP()):
+-            bbox_delta, confs = model(batch["image"])
+-            loss, to_log = model.loss_func(
+-                bbox_delta, confs, batch["boxes"], batch["labels"])
+-        scaler.scale(loss).backward()
+-        scaler.step(optim)
+-        scaler.update()
+-        optim.zero_grad()
+-        if grad_scale == scaler.get_scale():
+-            scheduler.step()
+-            if logger.global_step() % log_interval:
+-                logger.add_scalar("stats/learning_rate",
+-                                  scheduler._schedulers[-1].get_last_lr()[-1])
+-        else:
+-            grad_scale = scaler.get_scale()
+-            logger.add_scalar("amp/grad_scale", scaler.get_scale())
+-        if logger.global_step() % log_interval == 0:
+-            to_log = {f"loss/{k}": v.mean().cpu().item()
+-                      for k, v in to_log.items()}
+-            logger.add_dict(to_log)
+-        # torch.cuda.amp skips gradient steps if backward pass produces NaNs/infs.
+-        # If it happens in the first iteration, scheduler.step() will throw exception
+-        logger.step()
+-
+-    return
+-
+-
+-def print_config(cfg):
+-    container = OmegaConf.to_container(cfg)
+-    pp = pprint.PrettyPrinter(indent=2, compact=False)
+-    print("--------------------Config file below--------------------")
+-    pp.pprint(container)
+-    print("--------------------End of config file--------------------")
+-
+-
+-@click.command()
+-@click.argument("config_path", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+-@click.option("--evaluate-only", default=False, is_flag=True, help="Only run evaluation, no training.")
+-def train(config_path: Path, evaluate_only: bool):
+-    logger.logger.DEFAULT_SCALAR_LEVEL = logger.logger.DEBUG
+-    cfg = utils.load_config(config_path)
+-    print_config(cfg)
+-
+-    tops.init(cfg.output_dir)
+-    tops.set_AMP(cfg.train.amp)
+-    tops.set_seed(cfg.train.seed)
+-    dataloader_train = instantiate(cfg.data_train.dataloader)
+-    dataloader_val = instantiate(cfg.data_val.dataloader)
+-    cocoGt = dataloader_val.dataset.get_annotations_as_coco()
+-    model = tops.to_cuda(instantiate(cfg.model))
+-    optimizer = instantiate(cfg.optimizer, params=utils.tencent_trick(model))
+-    scheduler = ChainedScheduler(instantiate(
+-        list(cfg.schedulers.values()), optimizer=optimizer))
+-    checkpointer.register_models(
+-        dict(model=model, optimizer=optimizer, scheduler=scheduler))
+-    total_time = 0
+-    if checkpointer.has_checkpoint():
+-        train_state = checkpointer.load_registered_models(load_best=False)
+-        total_time = train_state["total_time"]
+-        logger.log(
+-            f"Resuming train from: epoch: {logger.epoch()}, global step: {logger.global_step()}")
+-
+-    gpu_transform_val = instantiate(cfg.data_val.gpu_transform)
+-    gpu_transform_train = instantiate(cfg.data_train.gpu_transform)
+-    evaluation_fn = functools.partial(
+-        evaluate,
+-        model=model,
+-        dataloader=dataloader_val,
+-        cocoGt=cocoGt,
+-        gpu_transform=gpu_transform_val,
+-        label_map=cfg.label_map
+-    )
+-    if evaluate_only:
+-        evaluation_fn()
+-        exit()
+-    scaler = torch.cuda.amp.GradScaler(enabled=tops.AMP())
+-    dummy_input = tops.to_cuda(torch.randn(
+-        1, cfg.train.image_channels, *cfg.train.imshape))
+-    tops.print_module_summary(model, (dummy_input,))
+-    start_epoch = logger.epoch()
+-    for epoch in range(start_epoch, cfg.train.epochs):
+-        start_epoch_time = time.time()
+-        train_epoch(model, scaler, optimizer, dataloader_train,
+-                    scheduler, gpu_transform_train, cfg.train.log_interval)
+-        end_epoch_time = time.time() - start_epoch_time
+-        total_time += end_epoch_time
+-        logger.add_scalar("stats/epoch_time", end_epoch_time)
+-
+-        eval_stats = evaluation_fn()
+-        eval_stats = {f"metrics/{key}": val for key, val in eval_stats.items()}
+-        logger.add_dict(eval_stats, level=logger.logger.INFO)
+-        train_state = dict(total_time=total_time)
+-        checkpointer.save_registered_models(train_state)
+-        logger.step_epoch()
+-    logger.add_scalar("stats/total_time", total_time)
+-
+-
+-if __name__ == "__main__":
+-    train()
+diff --git a/Project/src/utils/__init__.py b/Project/src/utils/__init__.py
+deleted file mode 100644
+index e69de29..0000000
+diff --git a/Project/src/utils/box_utils.py b/Project/src/utils/box_utils.py
+deleted file mode 100644
+index e85398e..0000000
+--- a/Project/src/utils/box_utils.py
++++ /dev/null
+@@ -1,41 +0,0 @@
+-import torch
+-import numpy as np
+-from typing import Union
+-
+-def bbox_ltrb_to_ltwh(boxes_ltrb: Union[np.ndarray, torch.Tensor]):
+-    cat = torch.cat if isinstance(boxes_ltrb, torch.Tensor) else np.concatenate
+-    assert boxes_ltrb.shape[-1] == 4
+-    return cat((boxes_ltrb[..., :2], boxes_ltrb[..., 2:] - boxes_ltrb[..., :2]), -1)
+-    
+-def bbox_center_to_ltrb(boxes_center: Union[np.ndarray, torch.Tensor]):
+-    cat = torch.stack if isinstance(boxes_center, torch.Tensor) else np.stack
+-    assert boxes_center.shape[-1] == 4
+-    cx, cy, w, h = [boxes_center[..., i] for i in range(4)]
+-    return cat((
+-        cx - 0.5*w,
+-        cy - 0.5*h,
+-        cx + 0.5*w,
+-        cy + 0.5*h,
+-    ), -1)
+-
+-def bbox_center_to_ltrb(boxes_center: Union[np.ndarray, torch.Tensor]):
+-    cat = torch.stack if isinstance(boxes_center, torch.Tensor) else np.stack
+-    assert boxes_center.shape[-1] == 4
+-    cx, cy, w, h = [boxes_center[..., i] for i in range(4)]
+-    return cat((
+-        cx - 0.5*w,
+-        cy - 0.5*h,
+-        cx + 0.5*w,
+-        cy + 0.5*h,
+-    ), -1)
+-
+-def bbox_ltrb_to_center(boxes_lrtb: Union[np.ndarray, torch.Tensor]):
+-    cat = torch.stack if isinstance(boxes_lrtb, torch.Tensor) else np.stack
+-    assert boxes_lrtb.shape[-1] == 4
+-    l, t, r, b = [boxes_lrtb[..., i] for i in range(4)]
+-    return cat((
+-        0.5*(l+r),
+-        0.5*(t+b),
+-        r - l,
+-        b - t
+-    ), -1)
+\ No newline at end of file
+diff --git a/Project/src/utils/config/__init__.py b/Project/src/utils/config/__init__.py
+deleted file mode 100644
+index b4470b0..0000000
+--- a/Project/src/utils/config/__init__.py
++++ /dev/null
+@@ -1,4 +0,0 @@
+-
+-# Copyright (c) Facebook, Inc. and its affiliates.
+-from .instantiate import instantiate
+-from .lazy import LazyCall, LazyConfig
+diff --git a/Project/src/utils/config/instantiate.py b/Project/src/utils/config/instantiate.py
+deleted file mode 100644
+index 1e4a32b..0000000
+--- a/Project/src/utils/config/instantiate.py
++++ /dev/null
+@@ -1,84 +0,0 @@
+-# Copyright (c) Facebook, Inc. and its affiliates.
+-import dataclasses
+-import logging
+-from collections import abc
+-from typing import Any
+-from omegaconf import ListConfig
+-
+-from .utils import _convert_target_to_string, locate
+-
+-__all__ = ["dump_dataclass", "instantiate"]
+-
+-
+-def dump_dataclass(obj: Any):
+-    """
+-    Dump a dataclass recursively into a dict that can be later instantiated.
+-
+-    Args:
+-        obj: a dataclass object
+-
+-    Returns:
+-        dict
+-    """
+-    assert dataclasses.is_dataclass(obj) and not isinstance(
+-        obj, type
+-    ), "dump_dataclass() requires an instance of a dataclass."
+-    ret = {"_target_": _convert_target_to_string(type(obj))}
+-    for f in dataclasses.fields(obj):
+-        v = getattr(obj, f.name)
+-        if dataclasses.is_dataclass(v):
+-            v = dump_dataclass(v)
+-        if isinstance(v, (list, tuple)):
+-            v = [dump_dataclass(x) if dataclasses.is_dataclass(
+-                x) else x for x in v]
+-        ret[f.name] = v
+-    return ret
+-
+-
+-def instantiate(cfg, **kwargs):
+-    """
+-    Recursively instantiate objects defined in dictionaries by
+-    "_target_" and arguments.
+-
+-    Args:
+-        cfg: a dict-like object with "_target_" that defines the caller, and
+-            other keys that define the arguments
+-
+-    Returns:
+-        object instantiated by cfg
+-    """
+-
+-    if isinstance(cfg, ListConfig):
+-        lst = [instantiate(x, **kwargs) for x in cfg]
+-        return ListConfig(lst, flags={"allow_objects": True})
+-    if isinstance(cfg, list):
+-        # Specialize for list, because many classes take
+-        # list[objects] as arguments, such as ResNet, DatasetMapper
+-        return [instantiate(x, **kwargs) for x in cfg]
+-
+-    if isinstance(cfg, abc.Mapping) and "_target_" in cfg:
+-        # conceptually equivalent to hydra.utils.instantiate(cfg) with _convert_=all,
+-        # but faster: https://github.com/facebookresearch/hydra/issues/1200
+-        cfg = {k: instantiate(v) for k, v in cfg.items()}
+-        cls = cfg.pop("_target_")
+-        cls = instantiate(cls)
+-
+-        if isinstance(cls, str):
+-            cls_name = cls
+-            cls = locate(cls_name)
+-            assert cls is not None, cls_name
+-        else:
+-            try:
+-                cls_name = cls.__module__ + "." + cls.__qualname__
+-            except Exception:
+-                # target could be anything, so the above could fail
+-                cls_name = str(cls)
+-        assert callable(
+-            cls), f"_target_ {cls} does not define a callable object"
+-        try:
+-            return cls(**cfg, **kwargs)
+-        except TypeError:
+-            logger = logging.getLogger(__name__)
+-            logger.error(f"Error when instantiating {cls_name}!")
+-            raise
+-    return cfg  # return as-is if don't know what to do
+diff --git a/Project/src/utils/config/lazy.py b/Project/src/utils/config/lazy.py
+deleted file mode 100644
+index 894cc2a..0000000
+--- a/Project/src/utils/config/lazy.py
++++ /dev/null
+@@ -1,400 +0,0 @@
+-# Copyright (c) Facebook, Inc. and its affiliates.
+-import ast
+-import builtins
+-import importlib
+-import inspect
+-import logging
+-import os
+-import uuid
+-import cloudpickle
+-import yaml
+-from collections import abc
+-from contextlib import contextmanager
+-from copy import deepcopy
+-from dataclasses import is_dataclass
+-from typing import List, Tuple, Union
+-from omegaconf import DictConfig, ListConfig, OmegaConf
+-
+-from .utils import _convert_target_to_string
+-
+-__all__ = ["LazyCall", "LazyConfig"]
+-
+-
+-class LazyCall:
+-    """
+-    Wrap a callable so that when it's called, the call will not be executed,
+-    but returns a dict that describes the call.
+-
+-    LazyCall object has to be called with only keyword arguments. Positional
+-    arguments are not yet supported.
+-
+-    Examples:
+-    ::
+-        from detectron2.config import instantiate, LazyCall
+-
+-        layer_cfg = LazyCall(nn.Conv2d)(in_channels=32, out_channels=32)
+-        layer_cfg.out_channels = 64   # can edit it afterwards
+-        layer = instantiate(layer_cfg)
+-    """
+-
+-    def __init__(self, target):
+-        if not (callable(target) or isinstance(target, (str, abc.Mapping))):
+-            raise TypeError(
+-                f"target of LazyCall must be a callable or defines a callable! Got {target}"
+-            )
+-        self._target = target
+-
+-    def __call__(self, **kwargs):
+-        if is_dataclass(self._target):
+-            # omegaconf object cannot hold dataclass type
+-            # https://github.com/omry/omegaconf/issues/784
+-            target = _convert_target_to_string(self._target)
+-        else:
+-            target = self._target
+-        kwargs["_target_"] = target
+-
+-        return DictConfig(content=kwargs, flags={"allow_objects": True})
+-
+-
+-def _visit_dict_config(cfg, func):
+-    """
+-    Apply func recursively to all DictConfig in cfg.
+-    """
+-    if isinstance(cfg, DictConfig):
+-        func(cfg)
+-        for v in cfg.values():
+-            _visit_dict_config(v, func)
+-    elif isinstance(cfg, ListConfig):
+-        for v in cfg:
+-            _visit_dict_config(v, func)
+-
+-
+-def _validate_py_syntax(filename):
+-    # see also https://github.com/open-mmlab/mmcv/blob/master/mmcv/utils/config.py
+-    with open(filename, "r") as f:
+-        content = f.read()
+-    try:
+-        ast.parse(content)
+-    except SyntaxError as e:
+-        raise SyntaxError(f"Config file {filename} has syntax error!") from e
+-
+-
+-def _cast_to_config(obj):
+-    # if given a dict, return DictConfig instead
+-    if isinstance(obj, dict):
+-        return DictConfig(obj, flags={"allow_objects": True})
+-    return obj
+-
+-
+-_CFG_PACKAGE_NAME = "detectron2._cfg_loader"
+-"""
+-A namespace to put all imported config into.
+-"""
+-
+-
+-def _random_package_name(filename):
+-    # generate a random package name when loading config files
+-    return _CFG_PACKAGE_NAME + str(uuid.uuid4())[:4] + "." + os.path.basename(filename)
+-
+-
+-@contextmanager
+-def _patch_import():
+-    """
+-    Enhance relative import statements in config files, so that they:
+-    1. locate files purely based on relative location, regardless of packages.
+-       e.g. you can import file without having __init__
+-    2. do not cache modules globally; modifications of module states has no side effect
+-    3. imported dict are turned into omegaconf.DictConfig automatically
+-    """
+-    old_import = builtins.__import__
+-
+-    def find_relative_file(original_file, relative_import_path, level):
+-        cur_file = os.path.dirname(original_file)
+-        for _ in range(level - 1):
+-            cur_file = os.path.dirname(cur_file)
+-        cur_name = relative_import_path.lstrip(".")
+-        for part in cur_name.split("."):
+-            cur_file = os.path.join(cur_file, part)
+-        # NOTE: directory import is not handled. Because then it's unclear
+-        # if such import should produce python module or DictConfig. This can
+-        # be discussed further if needed.
+-        if not cur_file.endswith(".py"):
+-            cur_file += ".py"
+-        if not os.path.isfile(cur_file):
+-            raise ImportError(
+-                f"Cannot import name {relative_import_path} from "
+-                f"{original_file}: {cur_file} has to exist."
+-            )
+-        return cur_file
+-
+-    def new_import(name, globals=None, locals=None, fromlist=(), level=0):
+-        if (
+-            # Only deal with relative imports inside config files
+-            level != 0
+-            and globals is not None
+-            and (globals.get("__package__", "") or "").startswith(_CFG_PACKAGE_NAME)
+-        ):
+-            cur_file = find_relative_file(globals["__file__"], name, level)
+-            _validate_py_syntax(cur_file)
+-            spec = importlib.machinery.ModuleSpec(
+-                _random_package_name(cur_file), None, origin=cur_file
+-            )
+-            module = importlib.util.module_from_spec(spec)
+-            module.__file__ = cur_file
+-            with open(cur_file) as f:
+-                content = f.read()
+-            exec(compile(content, cur_file, "exec"), module.__dict__)
+-            for name in fromlist:  # turn imported dict into DictConfig automatically
+-                val = _cast_to_config(module.__dict__[name])
+-                module.__dict__[name] = val
+-            return module
+-        return old_import(name, globals, locals, fromlist=fromlist, level=level)
+-
+-    builtins.__import__ = new_import
+-    yield new_import
+-    builtins.__import__ = old_import
+-
+-
+-class LazyConfig:
+-    """
+-    Provide methods to save, load, and overrides an omegaconf config object
+-    which may contain definition of lazily-constructed objects.
+-    """
+-
+-    @staticmethod
+-    def load_rel(filename: str, keys: Union[None, str, Tuple[str, ...]] = None):
+-        """
+-        Similar to :meth:`load()`, but load path relative to the caller's
+-        source file.
+-
+-        This has the same functionality as a relative import, except that this method
+-        accepts filename as a string, so more characters are allowed in the filename.
+-        """
+-        caller_frame = inspect.stack()[1]
+-        caller_fname = caller_frame[0].f_code.co_filename
+-        assert caller_fname != "<string>", "load_rel Unable to find caller"
+-        caller_dir = os.path.dirname(caller_fname)
+-        filename = os.path.join(caller_dir, filename)
+-        return LazyConfig.load(filename, keys)
+-
+-    @staticmethod
+-    def load(filename: str, keys: Union[None, str, Tuple[str, ...]] = None):
+-        """
+-        Load a config file.
+-
+-        Args:
+-            filename: absolute path or relative path w.r.t. the current working directory
+-            keys: keys to load and return. If not given, return all keys
+-                (whose values are config objects) in a dict.
+-        """
+-        has_keys = keys is not None
+-        filename = filename.replace("/./", "/")  # redundant
+-        if os.path.splitext(filename)[1] not in [".py", ".yaml", ".yml"]:
+-            raise ValueError(
+-                f"Config file {filename} has to be a python or yaml file.")
+-        if filename.endswith(".py"):
+-            _validate_py_syntax(filename)
+-
+-            with _patch_import():
+-                # Record the filename
+-                module_namespace = {
+-                    "__file__": filename,
+-                    "__package__": _random_package_name(filename),
+-                }
+-                with open(filename) as f:
+-                    content = f.read()
+-                # Compile first with filename to:
+-                # 1. make filename appears in stacktrace
+-                # 2. make load_rel able to find its parent's (possibly remote) location
+-                exec(compile(content, filename, "exec"), module_namespace)
+-            ret = module_namespace
+-        else:
+-            with open(filename) as f:
+-                obj = yaml.unsafe_load(f)
+-            ret = OmegaConf.create(obj, flags={"allow_objects": True})
+-
+-        if has_keys:
+-            if isinstance(keys, str):
+-                return _cast_to_config(ret[keys])
+-            else:
+-                return tuple(_cast_to_config(ret[a]) for a in keys)
+-        else:
+-            if filename.endswith(".py"):
+-                # when not specified, only load those that are config objects
+-                ret = DictConfig(
+-                    {
+-                        name: _cast_to_config(value)
+-                        for name, value in ret.items()
+-                        if isinstance(value, (DictConfig, ListConfig, dict))
+-                        and not name.startswith("_")
+-                    },
+-                    flags={"allow_objects": True},
+-                )
+-            return ret
+-
+-    @staticmethod
+-    def save(cfg, filename: str):
+-        """
+-        Save a config object to a yaml file.
+-        Note that when the config dictionary contains complex objects (e.g. lambda),
+-        it can't be saved to yaml. In that case we will print an error and
+-        attempt to save to a pkl file instead.
+-
+-        Args:
+-            cfg: an omegaconf config object
+-            filename: yaml file name to save the config file
+-        """
+-        logger = logging.getLogger(__name__)
+-        try:
+-            cfg = deepcopy(cfg)
+-        except Exception:
+-            pass
+-        else:
+-            # if it's deep-copyable, then...
+-            def _replace_type_by_name(x):
+-                if "_target_" in x and callable(x._target_):
+-                    try:
+-                        x._target_ = _convert_target_to_string(x._target_)
+-                    except AttributeError:
+-                        pass
+-
+-            # not necessary, but makes yaml looks nicer
+-            _visit_dict_config(cfg, _replace_type_by_name)
+-
+-        save_pkl = False
+-        try:
+-            dict = OmegaConf.to_container(cfg, resolve=False)
+-            dumped = yaml.dump(dict, default_flow_style=None,
+-                               allow_unicode=True, width=9999)
+-            with open(filename, "w") as f:
+-                f.write(dumped)
+-
+-            try:
+-                _ = yaml.unsafe_load(dumped)  # test that it is loadable
+-            except Exception:
+-                logger.warning(
+-                    "The config contains objects that cannot serialize to a valid yaml. "
+-                    f"{filename} is human-readable but cannot be loaded."
+-                )
+-                save_pkl = True
+-        except Exception:
+-            logger.exception("Unable to serialize the config to yaml. Error:")
+-            save_pkl = True
+-
+-        if save_pkl:
+-            new_filename = filename + ".pkl"
+-            try:
+-                # retry by pickle
+-                with open(new_filename, "wb") as f:
+-                    cloudpickle.dump(cfg, f)
+-                logger.warning(
+-                    f"Config is saved using cloudpickle at {new_filename}.")
+-            except Exception:
+-                pass
+-
+-    @staticmethod
+-    def apply_overrides(cfg, overrides: List[str]):
+-        """
+-        In-place override contents of cfg.
+-
+-        Args:
+-            cfg: an omegaconf config object
+-            overrides: list of strings in the format of "a=b" to override configs.
+-                See https://hydra.cc/docs/next/advanced/override_grammar/basic/
+-                for syntax.
+-
+-        Returns:
+-            the cfg object
+-        """
+-
+-        def safe_update(cfg, key, value):
+-            parts = key.split(".")
+-            for idx in range(1, len(parts)):
+-                prefix = ".".join(parts[:idx])
+-                v = OmegaConf.select(cfg, prefix, default=None)
+-                if v is None:
+-                    break
+-                if not OmegaConf.is_config(v):
+-                    raise KeyError(
+-                        f"Trying to update key {key}, but {prefix} "
+-                        f"is not a config, but has type {type(v)}."
+-                    )
+-            OmegaConf.update(cfg, key, value, merge=True)
+-
+-        from hydra.core.override_parser.overrides_parser import OverridesParser
+-
+-        parser = OverridesParser.create()
+-        overrides = parser.parse_overrides(overrides)
+-        for o in overrides:
+-            key = o.key_or_group
+-            value = o.value()
+-            if o.is_delete():
+-                # TODO support this
+-                raise NotImplementedError(
+-                    "deletion is not yet a supported override")
+-            safe_update(cfg, key, value)
+-        return cfg
+-
+-    @staticmethod
+-    def to_py(cfg, prefix: str = "cfg."):
+-        """
+-        Try to convert a config object into Python-like psuedo code.
+-
+-        Note that perfect conversion is not always possible. So the returned
+-        results are mainly meant to be human-readable, and not meant to be executed.
+-
+-        Args:
+-            cfg: an omegaconf config object
+-            prefix: root name for the resulting code (default: "cfg.")
+-
+-
+-        Returns:
+-            str of formatted Python code
+-        """
+-        import black
+-
+-        cfg = OmegaConf.to_container(cfg, resolve=True)
+-
+-        def _to_str(obj, prefix=None, inside_call=False):
+-            if prefix is None:
+-                prefix = []
+-            if isinstance(obj, abc.Mapping) and "_target_" in obj:
+-                # Dict representing a function call
+-                target = _convert_target_to_string(obj.pop("_target_"))
+-                args = []
+-                for k, v in sorted(obj.items()):
+-                    args.append(f"{k}={_to_str(v, inside_call=True)}")
+-                args = ", ".join(args)
+-                call = f"{target}({args})"
+-                return "".join(prefix) + call
+-            elif isinstance(obj, abc.Mapping) and not inside_call:
+-                # Dict that is not inside a call is a list of top-level config objects that we
+-                # render as one object per line with dot separated prefixes
+-                key_list = []
+-                for k, v in sorted(obj.items()):
+-                    if isinstance(v, abc.Mapping) and "_target_" not in v:
+-                        key_list.append(_to_str(v, prefix=prefix + [k + "."]))
+-                    else:
+-                        key = "".join(prefix) + k
+-                        key_list.append(f"{key}={_to_str(v)}")
+-                return "\n".join(key_list)
+-            elif isinstance(obj, abc.Mapping):
+-                # Dict that is inside a call is rendered as a regular dict
+-                return (
+-                    "{"
+-                    + ",".join(
+-                        f"{repr(k)}: {_to_str(v, inside_call=inside_call)}"
+-                        for k, v in sorted(obj.items())
+-                    )
+-                    + "}"
+-                )
+-            elif isinstance(obj, list):
+-                return "[" + ",".join(_to_str(x, inside_call=inside_call) for x in obj) + "]"
+-            else:
+-                return repr(obj)
+-
+-        py_str = _to_str(cfg, prefix=[prefix])
+-        try:
+-            return black.format_str(py_str, mode=black.Mode())
+-        except black.InvalidInput:
+-            return py_str
+diff --git a/Project/src/utils/config/utils.py b/Project/src/utils/config/utils.py
+deleted file mode 100644
+index 85194ed..0000000
+--- a/Project/src/utils/config/utils.py
++++ /dev/null
+@@ -1,49 +0,0 @@
+-import pydoc
+-from typing import Any
+-
+-def _convert_target_to_string(t: Any) -> str:
+-    """
+-    Inverse of ``locate()``.
+-
+-    Args:
+-        t: any object with ``__module__`` and ``__qualname__``
+-    """
+-    module, qualname = t.__module__, t.__qualname__
+-
+-    # Compress the path to this object, e.g. ``module.submodule._impl.class``
+-    # may become ``module.submodule.class``, if the later also resolves to the same
+-    # object. This simplifies the string, and also is less affected by moving the
+-    # class implementation.
+-    module_parts = module.split(".")
+-    for k in range(1, len(module_parts)):
+-        prefix = ".".join(module_parts[:k])
+-        candidate = f"{prefix}.{qualname}"
+-        try:
+-            if locate(candidate) is t:
+-                return candidate
+-        except ImportError:
+-            pass
+-    return f"{module}.{qualname}"
+-
+-
+-def locate(name: str) -> Any:
+-    """
+-    Locate and return an object ``x`` using an input string ``{x.__module__}.{x.__qualname__}``,
+-    such as "module.submodule.class_name".
+-
+-    Raise Exception if it cannot be found.
+-    """
+-    obj = pydoc.locate(name)
+-
+-    # Some cases (e.g. torch.optim.sgd.SGD) not handled correctly
+-    # by pydoc.locate. Try a private function from hydra.
+-    if obj is None:
+-        try:
+-            # from hydra.utils import get_method - will print many errors
+-            from hydra.utils import _locate
+-        except ImportError as e:
+-            raise ImportError(f"Cannot dynamically locate object {name}!") from e
+-        else:
+-            obj = _locate(name)  # it raises if fails
+-
+-    return obj
+diff --git a/Project/src/utils/torch_utils.py b/Project/src/utils/torch_utils.py
+deleted file mode 100644
+index 5459bc9..0000000
+--- a/Project/src/utils/torch_utils.py
++++ /dev/null
+@@ -1,35 +0,0 @@
+-import random
+-import numpy as np
+-import torch
+-
+-AMP_enabled = False
+-
+-def set_AMP(value: bool):
+-    global AMP_enabled
+-    AMP_enabled = value
+-
+-
+-def AMP():
+-    return AMP_enabled
+-
+-
+-def _to_cuda(element):
+-    return element.to(get_device(), non_blocking=True)
+-
+-
+-def to_cuda(elements):
+-    if isinstance(elements, tuple) or isinstance(elements, list):
+-        return [_to_cuda(x) for x in elements]
+-    if isinstance(elements, dict):
+-        return {k: _to_cuda(v) for k,v in elements.items()}
+-    return _to_cuda(elements)
+-
+-
+-def get_device() -> torch.device:
+-    return torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+-
+-
+-def set_seed(seed: int):
+-    torch.manual_seed(seed)
+-    np.random.seed(seed)
+-    random.seed(seed)
+diff --git a/Project/src/utils/utils.py b/Project/src/utils/utils.py
+deleted file mode 100644
+index febd953..0000000
+--- a/Project/src/utils/utils.py
++++ /dev/null
+@@ -1,78 +0,0 @@
+-import torch
+-from torch.utils.data._utils.collate import default_collate
+-from pathlib import Path
+-from os import PathLike
+-import pathlib
+-import getpass
+-from tqdm import tqdm
+-
+-from .config import LazyConfig
+-
+-
+-def batch_collate(batch):
+-    elem = batch[0]
+-    batch_ = {key: default_collate([d[key] for d in batch]) for key in elem}
+-    return batch_
+-
+-
+-def batch_collate_val(batch):
+-    """
+-        Same as batch_collate, but removes boxes/labels from dataloader
+-    """
+-    elem = batch[0]
+-    ignore_keys = set(("boxes", "labels"))
+-    batch_ = {key: default_collate([d[key] for d in batch])
+-              for key in elem if key not in ignore_keys}
+-    return batch_
+-
+-
+-def class_id_to_name(labels, label_map: list):
+-    if isinstance(labels, torch.Tensor):
+-        labels = labels.cpu().numpy().tolist()
+-    return [label_map[idx] for idx in labels]
+-
+-
+-def tencent_trick(model):
+-    """
+-    Divide parameters into 2 groups.
+-    First group is BNs and all biases.
+-    Second group is the remaining model's parameters.
+-    Weight decay will be disabled in first group (aka tencent trick).
+-    """
+-    decay, no_decay = [], []
+-    for name, param in model.named_parameters():
+-        if not param.requires_grad:
+-            continue  # frozen weights
+-        if len(param.shape) == 1 or name.endswith(".bias"):
+-            no_decay.append(param)
+-        else:
+-            decay.append(param)
+-    return [{'params': no_decay, 'weight_decay': 0.0},
+-            {'params': decay}]
+-
+-
+-def load_config(config_path: PathLike):
+-    config_path = Path(config_path)
+-    run_name = "_".join(config_path.parts[1:-1]) + "_" + config_path.stem
+-    cfg = LazyConfig.load(str(config_path))
+-    cfg.output_dir = Path(cfg.train._output_dir).joinpath(
+-        *config_path.parts[1:-1], config_path.stem)
+-    cfg.run_name = run_name
+-    return cfg
+-
+-
+-def get_output_dir():
+-    work_dir = pathlib.Path("/work", "snotra", getpass.getuser())
+-    save_in_work = False
+-    if work_dir.is_dir() and save_in_work:
+-        return work_dir.joinpath("ssd_outputs")
+-    return pathlib.Path("../outputs")
+-
+-
+-def progress_bar(iterable, desc=""):
+-    progress = tqdm(
+-        iterable,
+-        desc=desc,
+-        bar_format='{desc} |{bar:50}| {elapsed} {n_fmt}/{total_fmt}',
+-    )
+-    return progress
+diff --git a/Project/tasks/1-1.sh b/Project/tasks/1-1.sh
+index 445fb8e..371360e 100644
+--- a/Project/tasks/1-1.sh
++++ b/Project/tasks/1-1.sh
+@@ -1,6 +1,6 @@
+ echo -e "\nTask 1.1 - Getting to know your dataset"
+ cd src
+ echo -e "\nAnalyzing Data"
+-python -m benchmarks.dataset_exploration
++python3 -m dataset_exploration
+ echo -e "\nWriting Annotation Images"
+-python -m benchmarks.save_images_with_annotations
+\ No newline at end of file
++python3 -m save_images_with_annotations
+\ No newline at end of file
