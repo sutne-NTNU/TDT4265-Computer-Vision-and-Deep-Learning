@@ -15,8 +15,8 @@ class BaselineModel(torch.nn.Module):
         self.output_feature_shape = output_feature_sizes
 
         self.layers = nn.ModuleList(
+            # Conv2d(output_channels, input_channels, kernel_size, stride, padding)
             [
-                # Conv2d(output_channels, input_channels, kernel_size, stride, padding)
                 nn.Sequential(
                     nn.Conv2d(image_channels, 32, 3, 1, 1),
                     nn.ReLU(),
@@ -27,48 +27,48 @@ class BaselineModel(torch.nn.Module):
                     nn.ReLU(),
                     nn.Conv2d(64, output_channels[0], 4, 2, 1),
                     nn.ReLU(),
-                ),  # 38x38
+                ),
                 nn.Sequential(
                     nn.Conv2d(output_channels[0], 128, 3, 1, 1),
                     nn.ReLU(),
                     nn.Conv2d(128, output_channels[1], 4, 2, 1),
                     nn.ReLU(),
-                ),  # 19x19
+                ),
                 nn.Sequential(
                     nn.Conv2d(output_channels[1], 256, 3, 1, 1),
                     nn.ReLU(),
                     nn.Conv2d(256, output_channels[2], 4, 2, 1),
                     nn.ReLU(),
-                ),  # 9x9
+                ),
                 nn.Sequential(
                     nn.Conv2d(output_channels[2], 128, 3, 1, 1),
                     nn.ReLU(),
                     nn.Conv2d(128, output_channels[3], 4, 2, 1),
                     nn.ReLU(),
-                ),  # 5x5
+                ),
                 nn.Sequential(
                     nn.Conv2d(output_channels[3], 128, 3, 1, 1),
                     nn.ReLU(),
                     nn.Conv2d(128, output_channels[4], 4, 2, 1),
                     nn.ReLU(),
-                ),  # 3x3
+                ),
                 nn.Sequential(
                     nn.Conv2d(output_channels[4], 128, 3, 1, 1),
                     nn.ReLU(),
                     nn.Conv2d(128, output_channels[5], 4, 2, 1),
                     nn.ReLU(),
-                ),  # 1x1
+                ),
             ]
         )
 
     def forward(self, x):
         out_features = []
-        out_feature = x
+        feature = x
 
         # Perform Forward Pass
         for layer in self.layers:
-            out_feature = layer(out_feature)
-            out_features.append(out_feature)
+            feature = layer(feature)
+            out_features.append(feature)
 
         # Make sure output shapes are correct
         self.verify_out_features(out_features)
