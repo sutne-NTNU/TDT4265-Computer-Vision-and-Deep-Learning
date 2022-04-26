@@ -3,7 +3,7 @@ from torch import nn
 from typing import Tuple, List
 
 
-class BaselineModel(torch.nn.Module):
+class FeaturePyramidNetwork(torch.nn.Module):
     def __init__(
         self,
         output_channels: List[int],

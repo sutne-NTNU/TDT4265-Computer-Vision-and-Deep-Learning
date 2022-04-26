@@ -10,6 +10,7 @@ def get_diff_path(output_dir: Path):
         idx += 1
     return output_dir.joinpath(f"diff{idx}.patch")
 
+
 def dump_git_diff(output_dir: Path):
     output_dir.mkdir(exist_ok=True, parents=True)
     diff_path = get_diff_path(output_dir)
@@ -19,10 +20,12 @@ def dump_git_diff(output_dir: Path):
         f"git diff >> {diff_path}",
     ]
     try:
-        subprocess.call(" && ".join(cmd), shell=True,
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except Exception as e :
+        subprocess.call(
+            " && ".join(cmd),
+            shell=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception as e:
         print(e)
         pass
-
-

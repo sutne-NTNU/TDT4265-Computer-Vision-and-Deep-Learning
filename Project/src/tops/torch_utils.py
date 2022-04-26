@@ -4,6 +4,7 @@ import torch
 
 AMP_enabled = False
 
+
 def set_AMP(value: bool):
     global AMP_enabled
     AMP_enabled = value
@@ -21,7 +22,7 @@ def to_cuda(elements):
     if isinstance(elements, tuple) or isinstance(elements, list):
         return [_to_cuda(x) for x in elements]
     if isinstance(elements, dict):
-        return {k: _to_cuda(v) for k,v in elements.items()}
+        return {k: _to_cuda(v) for k, v in elements.items()}
     return _to_cuda(elements)
 
 

@@ -6,8 +6,9 @@ import tops
 def get_dataloader(cfg, dataset_to_visualize):
     if dataset_to_visualize == "train":
         # Remove GroundTruthBoxesToAnchors transform
-        cfg.data_train.dataset.transform.transforms = cfg.data_train.dataset.transform.transforms[
-            :-1]
+        cfg.data_train.dataset.transform.transforms = (
+            cfg.data_train.dataset.transform.transforms[:-1]
+        )
         data_loader = instantiate(cfg.data_train.dataloader)
     else:
         cfg.data_val.dataloader.collate_fn = batch_collate
@@ -22,7 +23,9 @@ def analyze_dataloader(config, dataset_name):
     labels = {}
     aspectRatios = {}  # Width / Height
 
-    for batch in tops.misc.progress_bar(dataloader, f"Analyzing Dataset: {dataset_name}"):
+    for batch in tops.misc.progress_bar(
+        dataloader, f"Analyzing Dataset: {dataset_name}"
+    ):
         # Batch Contains:
         #   'image'     - image data
         #   'image_id'  - id of image (number)
@@ -45,9 +48,9 @@ def analyze_dataloader(config, dataset_name):
 
                 # find aspect ratio of box and add it to dict list
                 x_min, y_min, x_max, y_max = box
-                width = (x_max - x_min)*image_width
-                height = (y_max - y_min)*image_height
-                aspectRatio = width/height
+                width = (x_max - x_min) * image_width
+                height = (y_max - y_min) * image_height
+                aspectRatio = width / height
 
                 if i not in aspectRatios:
                     aspectRatios[i] = [aspectRatio]
@@ -64,7 +67,7 @@ def analyze_dataloader(config, dataset_name):
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     config = LazyConfig.load("configs/baseline.py")
     config.train.batch_size = 1
 

@@ -8,7 +8,17 @@ from pycocotools.coco import COCO
 
 
 class TDT4265Dataset(data.Dataset):
-    class_names = ("background", "car", "truck", "bus", "motorcycle", "bicycle", "scooter", "person", "rider")
+    class_names = (
+        "background",
+        "car",
+        "truck",
+        "bus",
+        "motorcycle",
+        "bicycle",
+        "scooter",
+        "person",
+        "rider",
+    )
 
     def __init__(self, img_folder, annotation_file, transform=None):
         self.img_folder = img_folder
@@ -50,7 +60,9 @@ class TDT4265Dataset(data.Dataset):
         self.img_keys = list(self.images.keys())
         # Sorts the dataset to iterate over frames in the correct order
         sort_frame = lambda k: int(str(pathlib.Path(k).stem.split("_")[-1]))
-        sort_video = lambda k: int(str(pathlib.Path(k).stem.split("_")[-2].replace("Video", "")))
+        sort_video = lambda k: int(
+            str(pathlib.Path(k).stem.split("_")[-2].replace("Video", ""))
+        )
         self.img_keys.sort(key=lambda key: sort_frame(self.images[key][0]))
         self.img_keys.sort(key=lambda key: sort_video(self.images[key][0]))
         self.transform = transform
@@ -81,8 +93,12 @@ class TDT4265Dataset(data.Dataset):
         img = np.array(img)
 
         sample = dict(
-            image=img, boxes=bbox_ltrb, labels=bbox_labels,
-            width=wtot, height=htot, image_id=img_id
+            image=img,
+            boxes=bbox_ltrb,
+            labels=bbox_labels,
+            width=wtot,
+            height=htot,
+            image_id=img_id,
         )
         if self.transform:
             sample = self.transform(sample)

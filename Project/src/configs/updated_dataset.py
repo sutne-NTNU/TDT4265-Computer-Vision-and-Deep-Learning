@@ -13,13 +13,15 @@ from .baseline import (
     train_cpu_transform,
     val_cpu_transform,
     gpu_transform,
-    label_map
+    label_map,
 )
 
 
 data_train.dataset.img_folder = get_dataset_dir("tdt4265_2022_updated")
 data_train.dataset.annotation_file = get_dataset_dir(
-    "tdt4265_2022_updated/train_annotations.json")
+    "tdt4265_2022_updated/train_annotations.json"
+)
 data_val.dataset.img_folder = get_dataset_dir("tdt4265_2022_updated")
 data_val.dataset.annotation_file = get_dataset_dir(
-    "tdt4265_2022_updated/val_annotations.json")
+    "tdt4265_2022_updated/val_annotations.json"
+)

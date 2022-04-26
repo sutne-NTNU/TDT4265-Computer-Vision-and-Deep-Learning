@@ -5,16 +5,19 @@ import torch
 from tops.config import instantiate, LazyConfig
 from tops import to_cuda
 from pathlib import Path
+
 np.random.seed(0)
 
 
 @click.command()
-@click.argument("config_path", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.argument(
+    "config_path", type=click.Path(exists=True, dir_okay=False, path_type=Path)
+)
 def main(config_path):
     cfg = LazyConfig.load(str(config_path))
     dataloader = instantiate(cfg.data_train.dataloader)
     gpu_transform = instantiate(cfg.data_train.gpu_transform)
-    for batch in dataloader: # Warmup
+    for batch in dataloader:  # Warmup
         batch = to_cuda(batch)
         batch = gpu_transform(batch)
     torch.cuda.synchronize()
