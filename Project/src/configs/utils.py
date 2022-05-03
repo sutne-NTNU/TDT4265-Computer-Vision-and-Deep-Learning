@@ -16,7 +16,6 @@ def get_dataset_dir(dataset_relpath: str):
 def get_output_dir():
     work_dir = pathlib.Path("/work", "snotra", getpass.getuser())
     save_in_work = False
-    if work_dir.is_dir():
-        if save_in_work:
-            return work_dir.joinpath("ssd_outputs")
-    return pathlib.Path("outputs")
+    if work_dir.is_dir() and save_in_work:
+        return work_dir.joinpath("ssd_outputs")
+    return pathlib.Path("../outputs")

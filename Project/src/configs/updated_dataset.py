@@ -1,4 +1,4 @@
-from data import get_dataset_dir
+from .utils import get_dataset_dir
 
 # Import everything from the old dataset and only change the dataset folder.
 from .baseline import (
