@@ -4,7 +4,7 @@ import numpy as np
 from vizer.draw import draw_boxes
 
 from tops.config import instantiate, LazyConfig
-from configs.utils import get_output_dir
+from configs.utils import get_image_dir
 import tops
 
 
@@ -96,8 +96,8 @@ if __name__ == "__main__":
     config_path = "configs/baseline.py"
     cfg = get_config(config_path)
     dataset_to_visualize = "train"  # or "val"
-    num_images_to_visualize = 100  # Increase this if you want to save more images
+    num_images_to_visualize = 10  # Increase this if you want to save more images
 
     dataloader = get_dataloader(cfg, dataset_to_visualize)
-    save_folder = os.path.join(get_output_dir(), "annotation_images")
+    save_folder = os.path.join(get_image_dir(), "annotation_images")
     save_images_with_annotations(dataloader, cfg, save_folder, num_images_to_visualize)

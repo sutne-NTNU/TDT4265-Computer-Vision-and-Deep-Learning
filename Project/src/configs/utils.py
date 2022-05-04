@@ -17,3 +17,11 @@ def get_output_dir():
     if work_dir.is_dir() and save_in_work:
         return work_dir.joinpath("ssd_outputs")
     return pathlib.Path("../outputs")
+
+
+def get_image_dir():
+    return pathlib.Path("../images")
+
+
+def get_plot_dir():
+    return pathlib.Path("../plots")

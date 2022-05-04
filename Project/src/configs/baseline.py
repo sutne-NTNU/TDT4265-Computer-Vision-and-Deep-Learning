@@ -24,9 +24,23 @@ train = dict(
 )
 
 anchors = L(AnchorBoxes)(
-    feature_sizes=[[32, 256], [16, 128], [8, 64], [4, 32], [2, 16], [1, 8]],
+    feature_sizes=[
+        [32, 256],
+        [16, 128],
+        [8, 64],
+        [4, 32],
+        [2, 16],
+        [1, 8],
+    ],
     # Strides is the number of pixels (in image space) between each spatial position in the feature map
-    strides=[[4, 4], [8, 8], [16, 16], [32, 32], [64, 64], [128, 128]],
+    strides=[
+        [4, 4],
+        [8, 8],
+        [16, 16],
+        [32, 32],
+        [64, 64],
+        [128, 128],
+    ],
     min_sizes=[
         [16, 16],
         [32, 32],
@@ -40,7 +54,14 @@ anchors = L(AnchorBoxes)(
     # aspect ratio is used to define two boxes per element in the list.
     # if ratio=[2], boxes will be created with ratio 1:2 and 2:1
     # Number of boxes per location is in total 2 + 2 per aspect ratio
-    aspect_ratios=[[2, 3], [2, 3], [2, 3], [2, 3], [2], [2]],
+    aspect_ratios=[
+        [2, 3],
+        [2, 3],
+        [2, 3],
+        [2, 3],
+        [2],
+        [2],
+    ],
     image_shape="${train.imshape}",
     scale_center_variance=0.1,
     scale_size_variance=0.2,
@@ -52,7 +73,9 @@ backbone = L(BaselineModel)(
     output_feature_sizes="${anchors.feature_sizes}",
 )
 
-loss_objective = L(SSDMultiboxLoss)(anchors="${anchors}")
+loss_objective = L(SSDMultiboxLoss)(
+    anchors="${anchors}",
+)
 
 model = L(SSD300)(
     feature_extractor="${backbone}",
@@ -61,7 +84,11 @@ model = L(SSD300)(
     num_classes=8 + 1,  # Add 1 for background class
 )
 
-optimizer = L(torch.optim.SGD)(lr=5e-3, momentum=0.9, weight_decay=0.0005)
+optimizer = L(torch.optim.SGD)(
+    lr=5e-3,
+    momentum=0.9,
+    weight_decay=0.0005,
+)
 
 schedulers = dict(
     linear=L(LinearLR)(start_factor=0.1, end_factor=1, total_iters=500),
@@ -85,7 +112,10 @@ val_cpu_transform = L(torchvision.transforms.Compose)(
 
 gpu_transform = L(torchvision.transforms.Compose)(
     transforms=[
-        L(Normalize)(mean=[0.4765, 0.4774, 0.2259], std=[0.2951, 0.2864, 0.2878])
+        L(Normalize)(
+            mean=[0.4765, 0.4774, 0.2259],
+            std=[0.2951, 0.2864, 0.2878],
+        )
     ]
 )
 
@@ -125,4 +155,6 @@ data_val = dict(
 )
 
 
-label_map = {idx: cls_name for idx, cls_name in enumerate(TDT4265Dataset.class_names)}
+label_map = {
+    idx: class_name for idx, class_name in enumerate(TDT4265Dataset.class_names)
+}

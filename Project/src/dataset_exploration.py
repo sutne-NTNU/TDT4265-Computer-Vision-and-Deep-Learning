@@ -2,30 +2,28 @@ import matplotlib
 import matplotlib.pyplot as plt
 import os
 from collections import OrderedDict
-import pathlib
 
 from tops.config import instantiate, LazyConfig
 from ssd.utils import batch_collate, batch_collate_val
+from configs.utils import get_plot_dir
 import tops
 
 
-def verify_dir(dir_path: str):
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
-
-
-plot_output_dir = pathlib.Path("../plots/dataset_exploration/")
-
 matplotlib.rcParams.update(
     {
+        "figure.figsize": (10, 6),
         "axes.grid": True,
         "axes.axisbelow": True,
         "grid.color": "k",
         "grid.linestyle": ":",
         "grid.linewidth": 0.5,
-        "figure.figsize": (10, 6),
     }
 )
+
+
+def verify_dir(dir_path: str):
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
 
 
 def get_dataloader(cfg, dataset_to_visualize):
@@ -85,9 +83,9 @@ def analyze_dataloader(config, dataset_name) -> OrderedDict:
 
 def plot_results(data: dict, output_dir: str = None):
     if output_dir is None:
-        output_dir = plot_output_dir
+        output_dir = os.path.join(get_plot_dir(), "dataset_exploration")
     else:
-        output_dir = os.path.join(plot_output_dir, output_dir)
+        output_dir = os.path.join(get_plot_dir(), "dataset_exploration", output_dir)
     verify_dir(output_dir)
 
     # want to make sure the same color is used for the same label in all plots
@@ -117,8 +115,8 @@ def plot_results(data: dict, output_dir: str = None):
     values = [data[i]["aspect_ratios"] for i in data.keys()]
     plt.figure()
     plt.hist(values, stacked=True, bins=60, range=(0, 3), label=labels, color=colors)
-    plt.title(f"Stacked Aspect Ratios for Bounding Boxes for all labels")
-    plt.xlabel("Aspect Ratio (width/height)")
+    plt.title(f"Aspect Ratio Count (Stacked) for all Bounding Boxes")
+    plt.xlabel("Bounding Box Aspect Ratio (width/height)")
     plt.ylabel("Count (Stacked)")
     plt.legend(loc="upper right")
     plt.tight_layout()
@@ -146,11 +144,11 @@ if __name__ == "__main__":
     config = LazyConfig.load("configs/baseline.py")
     config.train.batch_size = 1
     results = analyze_dataloader(config, "train")
-    plot_results(results, "train_tdt4265")
+    plot_results(results, "train")
     results = analyze_dataloader(config, "val")
-    plot_results(results, "val_tdt4265")
+    plot_results(results, "val")
 
     config = LazyConfig.load("configs/updated_dataset.py")
     config.train.batch_size = 1
     results = analyze_dataloader(config, "train")
-    plot_results(results, "train_tdt4265_extended")
+    plot_results(results, "train_updated")

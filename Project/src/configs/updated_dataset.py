@@ -16,12 +16,12 @@ from .baseline import (
     label_map,
 )
 
+images = get_dataset_dir("tdt4265_2022_updated")
+train_annotations = get_dataset_dir("tdt4265_2022_updated/train_annotations.json")
+val_annotations = get_dataset_dir("tdt4265_2022_updated/val_annotations.json")
 
-data_train.dataset.img_folder = get_dataset_dir("tdt4265_2022_updated")
-data_train.dataset.annotation_file = get_dataset_dir(
-    "tdt4265_2022_updated/train_annotations.json"
-)
-data_val.dataset.img_folder = get_dataset_dir("tdt4265_2022_updated")
-data_val.dataset.annotation_file = get_dataset_dir(
-    "tdt4265_2022_updated/val_annotations.json"
-)
+data_train.dataset.img_folder = images
+data_train.dataset.annotation_file = train_annotations
+
+data_val.dataset.img_folder = images
+data_val.dataset.annotation_file = val_annotations

@@ -6,7 +6,7 @@ from ssd.data.transforms import (
     ToTensor,
     RandomSampleCrop,
     RandomHorizontalFlip,
-    Normalize,
+    ColorJitter,
     Resize,
     GroundTruthBoxesToAnchors,
 )
@@ -30,9 +30,10 @@ from .baseline import (
 
 train_cpu_transform = L(torchvision.transforms.Compose)(
     transforms=[
-        L(RandomSampleCrop)(),
+        # L(RandomSampleCrop)(),
         L(ToTensor)(),
         L(RandomHorizontalFlip)(),
+        L(ColorJitter)(brightness=0.2, contrast=0.1, saturation=0.1, hue=0.5),
         L(Resize)(imshape="${train.imshape}"),
         L(GroundTruthBoxesToAnchors)(anchors="${anchors}", iou_threshold=0.5),
     ]
