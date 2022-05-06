@@ -1,6 +1,8 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import os
+import numpy as np
+from typing import List
 from collections import OrderedDict
 
 from tops.config import instantiate, LazyConfig
@@ -124,6 +126,7 @@ def plot_results(data: dict, output_dir: str = None):
     plt.close()
 
     # Size
+    max_width, max_height = 400, 130
     for i in data.keys():
         label = data[i]["name"]
         widths = data[i]["widths"]
@@ -131,13 +134,34 @@ def plot_results(data: dict, output_dir: str = None):
         plt.figure()
         plt.scatter(widths, heights, label=label, color=colors[i - 1], marker=".")
         plt.title(f"Width and Height for Bounding Boxes for '{label}'")
-        plt.xlim((0, 400))
-        plt.ylim((0, 130))
+        plt.xlim((0, max_width))
+        plt.ylim((0, max_height))
         plt.xlabel("Width (pixels)")
         plt.ylabel("Height (pixels)")
         plt.tight_layout()
         plt.savefig(f"{output_dir}/sizes-{label}.png")
         plt.close()
+
+    # All Sizes Heatmap
+    widths: List[int] = []
+    heights: List[int] = []
+    max_width, max_height = 135, 80
+    for i in data.keys():
+        widths.extend(data[i]["widths"])
+        heights.extend(data[i]["heights"])
+    heatmap = np.zeros((max_height, max_width), dtype=int)
+    for width, height in zip(widths, heights):
+        if width < max_width and height < max_height:
+            heatmap[int(height), int(width)] += 1
+    plt.rcParams["axes.grid"] = False
+    plt.imshow(heatmap, cmap="jet", origin="lower")
+    plt.title("Heatmap of all Bounding Box Sizes")
+    plt.xlabel("Width (pixels)")
+    plt.ylabel("Height (pixels)")
+    plt.tight_layout()
+    plt.savefig(f"{output_dir}/sizes.png")
+    plt.close()
+    plt.rcParams["axes.grid"] = True
 
 
 if __name__ == "__main__":
