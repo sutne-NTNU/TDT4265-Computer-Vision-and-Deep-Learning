@@ -145,7 +145,7 @@ def plot_results(data: dict, output_dir: str = None):
     # All Sizes Heatmap
     widths: List[int] = []
     heights: List[int] = []
-    max_width, max_height = 135, 80
+    max_width, max_height = 100, 60
     for i in data.keys():
         widths.extend(data[i]["widths"])
         heights.extend(data[i]["heights"])
@@ -155,6 +155,7 @@ def plot_results(data: dict, output_dir: str = None):
             heatmap[int(height), int(width)] += 1
     plt.rcParams["axes.grid"] = False
     plt.imshow(heatmap, cmap="jet", origin="lower")
+    plt.colorbar(label="Count")
     plt.title("Heatmap of all Bounding Box Sizes")
     plt.xlabel("Width (pixels)")
     plt.ylabel("Height (pixels)")
