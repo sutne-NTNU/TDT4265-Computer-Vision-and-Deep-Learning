@@ -1,4 +1,7 @@
-from .baseline import (
+from tops.config import LazyCall as L
+from ssd.modeling import SSDMultiboxLoss
+
+from .task_2_3_1 import (
     train,
     anchors,
     backbone,
@@ -12,4 +15,10 @@ from .baseline import (
     data_train,
     data_val,
     label_map,
+)
+
+
+loss_objective = L(SSDMultiboxLoss)(
+    anchors="${anchors}",
+    use_focal_loss=True,
 )

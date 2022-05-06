@@ -1,38 +1,87 @@
 import torch
-import torch.nn as nn
+import numpy as np
+from torch.nn import ModuleList, Sequential, Conv2d, ReLU
 from .anchor_encoder import AnchorEncoder
 from torchvision.ops import batched_nms
 
 
-class SSD300(nn.Module):
+class SSD300(torch.nn.Module):
     def __init__(
-        self, feature_extractor: nn.Module, anchors, loss_objective, num_classes: int
+        self,
+        feature_extractor: torch.nn.Module,
+        anchors,
+        loss_objective,
+        num_classes: int,
+        use_deep_heads: bool = False,
+        use_improved_weight_init: bool = False,
     ):
         super().__init__()
         """
-            Implements the SSD network.
-            Backbone outputs a list of features, which are gressed to SSD output with regression/classification heads.
+        Implements the SSD network.
+        Backbone outputs a list of features, which are gressed to SSD output with 
+        regression/classification heads.
         """
-
         self.feature_extractor = feature_extractor
         self.loss_func = loss_objective
         self.num_classes = num_classes
+        self.use_deep_heads = use_deep_heads
+        self.use_improved_weight_init = use_improved_weight_init
         self.regression_heads = []
         self.classification_heads = []
 
         # Initialize output heads that are applied to each feature map from the backbone.
         for n_boxes, out_ch in zip(
-            anchors.num_boxes_per_fmap, self.feature_extractor.out_channels
+            anchors.num_boxes_per_fmap,
+            self.feature_extractor.out_channels,
         ):
-            self.regression_heads.append(
-                nn.Conv2d(out_ch, n_boxes * 4, kernel_size=3, padding=1)
-            )
-            self.classification_heads.append(
-                nn.Conv2d(out_ch, n_boxes * self.num_classes, kernel_size=3, padding=1)
-            )
+            kernel_size, stride, padding = 3, 1, 1
+            regr_out_ch = n_boxes * 4
+            clsf_out_ch = n_boxes * self.num_classes
 
-        self.regression_heads = nn.ModuleList(self.regression_heads)
-        self.classification_heads = nn.ModuleList(self.classification_heads)
+            if self.use_deep_heads:
+                self.regression_heads.append(
+                    Sequential(
+                        Conv2d(out_ch, out_ch, kernel_size, stride, padding),
+                        ReLU(),
+                        Conv2d(out_ch, out_ch, kernel_size, stride, padding),
+                        ReLU(),
+                        Conv2d(out_ch, out_ch, kernel_size, stride, padding),
+                        ReLU(),
+                        Conv2d(out_ch, out_ch, kernel_size, stride, padding),
+                        ReLU(),
+                        Conv2d(out_ch, regr_out_ch, kernel_size, stride, padding),
+                    )
+                )
+                self.classification_heads.append(
+                    Sequential(
+                        Conv2d(out_ch, out_ch, kernel_size, stride, padding),
+                        ReLU(),
+                        Conv2d(out_ch, out_ch, kernel_size, stride, padding),
+                        ReLU(),
+                        Conv2d(out_ch, out_ch, kernel_size, stride, padding),
+                        ReLU(),
+                        Conv2d(out_ch, out_ch, kernel_size, stride, padding),
+                        ReLU(),
+                        Conv2d(out_ch, clsf_out_ch, kernel_size, stride, padding),
+                    )
+                )
+
+            else:
+                self.regression_heads.append(
+                    Conv2d(out_ch, regr_out_ch, kernel_size, stride, padding)
+                )
+                self.classification_heads.append(
+                    Conv2d(out_ch, clsf_out_ch, kernel_size, stride, padding)
+                )
+
+        self.n_boxes_last = anchors.num_boxes_per_fmap[-1]
+        self.regression_heads = ModuleList(self.regression_heads)
+        self.classification_heads = ModuleList(self.classification_heads)
+        self.anchor_encoder = AnchorEncoder(anchors)
+        self._init_weights()
+
+        self.regression_heads = ModuleList(self.regression_heads)
+        self.classification_heads = ModuleList(self.classification_heads)
         self.anchor_encoder = AnchorEncoder(anchors)
         self._init_weights()
 
@@ -41,7 +90,12 @@ class SSD300(nn.Module):
         for layer in layers:
             for param in layer.parameters():
                 if param.dim() > 1:
-                    nn.init.xavier_uniform_(param)
+                    torch.nn.init.xavier_uniform_(param)
+
+        if self.use_improved_weight_init:
+            p = 0.99
+            bias = np.log(p * (self.num_classes - 1) / (1 - p))
+            self.classification_heads[-1][-1].bias.data.fill_(bias)
 
     def regress_boxes(self, features):
         locations = []

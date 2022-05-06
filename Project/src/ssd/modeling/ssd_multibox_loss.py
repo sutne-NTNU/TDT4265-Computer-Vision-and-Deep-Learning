@@ -28,6 +28,21 @@ def hard_negative_mining(loss, labels, neg_pos_ratio):
     return pos_mask | neg_mask
 
 
+def focal_loss(confs: torch.FloatTensor, gt_labels: torch.LongTensor):
+    num_classes = 8 + 1
+    gamma = 2
+
+    y = torch.transpose(F.one_hot(gt_labels, num_classes=num_classes).float(), -1, -2)
+
+    alphas = torch.tensor([0.01, *[1 for _ in range(num_classes - 1)]]).cuda()
+    alphas = alphas.repeat(confs.shape[2], 1).T
+    weight = torch.pow(1.0 - F.softmax(confs, dim=1), gamma)
+    focal = (
+        -alphas.repeat(confs.shape[0], 1, 1) * weight * y * F.log_softmax(confs, dim=1)
+    )
+    return torch.sum(focal)
+
+
 class SSDMultiboxLoss(nn.Module):
     """
     Implements the loss as the sum of the followings:
@@ -36,10 +51,11 @@ class SSDMultiboxLoss(nn.Module):
     Suppose input dboxes has the shape 8732x4
     """
 
-    def __init__(self, anchors):
+    def __init__(self, anchors, use_focal_loss: bool = False):
         super().__init__()
         self.scale_xy = 1.0 / anchors.scale_xy
         self.scale_wh = 1.0 / anchors.scale_wh
+        self.use_focal_loss = use_focal_loss
 
         self.sl1_loss = nn.SmoothL1Loss(reduction="none")
         self.anchors = nn.Parameter(
@@ -74,12 +90,16 @@ class SSDMultiboxLoss(nn.Module):
         """
         # reshape to [batch_size, 4, num_anchors]
         gt_bbox = gt_bbox.transpose(1, 2).contiguous()
-        with torch.no_grad():
-            to_log = -F.log_softmax(confs, dim=1)[:, 0]
-            mask = hard_negative_mining(to_log, gt_labels, 3.0)
 
-        classification_loss = F.cross_entropy(confs, gt_labels, reduction="none")
-        classification_loss = classification_loss[mask].sum()
+        if self.use_focal_loss:
+            classification_loss = focal_loss(confs, gt_labels)
+        else:
+            with torch.no_grad():
+                to_log = -F.log_softmax(confs, dim=1)[:, 0]
+                mask = hard_negative_mining(to_log, gt_labels, 3.0)
+
+            classification_loss = F.cross_entropy(confs, gt_labels, reduction="none")
+            classification_loss = classification_loss[mask].sum()
 
         pos_mask = (gt_labels > 0).unsqueeze(1).repeat(1, 4, 1)
         bbox_delta = bbox_delta[pos_mask]
