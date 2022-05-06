@@ -1,7 +1,7 @@
 from .utils import get_dataset_dir
 
 # Import everything from the old dataset and only change the dataset folder.
-from .baseline import (
+from .task_2_4 import (
     train,
     optimizer,
     schedulers,

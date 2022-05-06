@@ -68,10 +68,14 @@ class SSD300(torch.nn.Module):
 
             else:
                 self.regression_heads.append(
-                    Conv2d(out_ch, regr_out_ch, kernel_size, stride, padding)
+                    Sequential(
+                        Conv2d(out_ch, regr_out_ch, kernel_size, stride, padding)
+                    )
                 )
                 self.classification_heads.append(
-                    Conv2d(out_ch, clsf_out_ch, kernel_size, stride, padding)
+                    Sequential(
+                        Conv2d(out_ch, clsf_out_ch, kernel_size, stride, padding)
+                    )
                 )
 
         self.n_boxes_last = anchors.num_boxes_per_fmap[-1]
