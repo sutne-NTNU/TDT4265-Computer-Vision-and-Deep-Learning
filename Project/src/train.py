@@ -28,7 +28,7 @@ def train_epoch(
     log_interval: int,
 ):
     grad_scale = scaler.get_scale()
-    for batch in tqdm(dataloader_train, f"Epoch {logger.epoch() + 1}"):
+    for batch in dataloader_train:
         batch = tops.to_cuda(batch)
         batch["labels"] = batch["labels"].long()
         batch = gpu_transform(batch)
@@ -82,7 +82,7 @@ def print_config(cfg):
 def train(config_path: Path, evaluate_only: bool):
     logger.logger.DEFAULT_SCALAR_LEVEL = logger.logger.DEBUG
     cfg = utils.load_config(config_path)
-    print_config(cfg)
+    # print_config(cfg)
 
     tops.init(cfg.output_dir)
     tops.set_AMP(cfg.train.amp)
@@ -125,13 +125,18 @@ def train(config_path: Path, evaluate_only: bool):
     )
     tops.print_module_summary(model, (dummy_input,))
     start_epoch = logger.epoch()
-    for epoch in range(start_epoch, cfg.train.epochs):
+    for _ in range(start_epoch, cfg.train.epochs):
         start_epoch_time = time.time()
+        progress = tqdm(
+            dataloader_train,
+            desc=f"Training Epoch {logger.epoch()+1}/{cfg.train.epochs}: ",
+            bar_format="{desc} |{bar:30}| {elapsed} {n_fmt}/{total_fmt} {postfix}",
+        )
         train_epoch(
             model,
             scaler,
             optimizer,
-            dataloader_train,
+            progress,
             scheduler,
             gpu_transform_train,
             cfg.train.log_interval,

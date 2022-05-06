@@ -1,3 +1,3 @@
-echo -e "\nTask 2.2 - Adding Data Augmentation."
 cd src
-python3 train.py configs/data_augmentation.py
+echo -e "\nTask 2.2 - Adding Data Augmentation."
+python3 train.py configs/task_2_2.py

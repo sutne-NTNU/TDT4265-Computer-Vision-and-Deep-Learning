@@ -1,5 +1,5 @@
 import torch
-from torch import nn
+from torch.nn import ModuleList, Sequential, Conv2d, ReLU, MaxPool2d
 from typing import Tuple, List
 
 
@@ -14,49 +14,49 @@ class BaselineModel(torch.nn.Module):
         self.out_channels = output_channels
         self.output_feature_shape = output_feature_sizes
 
-        self.layers = nn.ModuleList(
-            # Conv2d(output_channels, input_channels, kernel_size, stride, padding)
+        kernel_size, stride, stride2, padding = 3, 1, 2, 1
+        self.layers = ModuleList(
             [
-                nn.Sequential(
-                    nn.Conv2d(image_channels, 32, 3, 1, 1),
-                    nn.ReLU(),
-                    nn.MaxPool2d(kernel_size=2, stride=2),
-                    nn.Conv2d(32, 64, 3, 1, 1),
-                    nn.ReLU(),
-                    nn.Conv2d(64, 64, 3, 1, 1),
-                    nn.ReLU(),
-                    nn.Conv2d(64, output_channels[0], 4, 2, 1),
-                    nn.ReLU(),
+                Sequential(
+                    Conv2d(image_channels, 32, kernel_size, stride, padding),
+                    ReLU(),
+                    MaxPool2d(kernel_size=2, stride=2),
+                    Conv2d(32, 64, kernel_size, stride, padding),
+                    ReLU(),
+                    Conv2d(64, 64, kernel_size, stride, padding),
+                    ReLU(),
+                    Conv2d(64, output_channels[0], kernel_size, stride2, padding),
+                    ReLU(),
                 ),
-                nn.Sequential(
-                    nn.Conv2d(output_channels[0], 128, 3, 1, 1),
-                    nn.ReLU(),
-                    nn.Conv2d(128, output_channels[1], 4, 2, 1),
-                    nn.ReLU(),
+                Sequential(
+                    Conv2d(output_channels[0], 128, kernel_size, stride, padding),
+                    ReLU(),
+                    Conv2d(128, output_channels[1], kernel_size, stride2, padding),
+                    ReLU(),
                 ),
-                nn.Sequential(
-                    nn.Conv2d(output_channels[1], 256, 3, 1, 1),
-                    nn.ReLU(),
-                    nn.Conv2d(256, output_channels[2], 4, 2, 1),
-                    nn.ReLU(),
+                Sequential(
+                    Conv2d(output_channels[1], 256, kernel_size, stride, padding),
+                    ReLU(),
+                    Conv2d(256, output_channels[2], kernel_size, stride2, padding),
+                    ReLU(),
                 ),
-                nn.Sequential(
-                    nn.Conv2d(output_channels[2], 128, 3, 1, 1),
-                    nn.ReLU(),
-                    nn.Conv2d(128, output_channels[3], 4, 2, 1),
-                    nn.ReLU(),
+                Sequential(
+                    Conv2d(output_channels[2], 128, kernel_size, stride, padding),
+                    ReLU(),
+                    Conv2d(128, output_channels[3], kernel_size, stride2, padding),
+                    ReLU(),
                 ),
-                nn.Sequential(
-                    nn.Conv2d(output_channels[3], 128, 3, 1, 1),
-                    nn.ReLU(),
-                    nn.Conv2d(128, output_channels[4], 4, 2, 1),
-                    nn.ReLU(),
+                Sequential(
+                    Conv2d(output_channels[3], 128, kernel_size, stride, padding),
+                    ReLU(),
+                    Conv2d(128, output_channels[4], kernel_size, stride2, padding),
+                    ReLU(),
                 ),
-                nn.Sequential(
-                    nn.Conv2d(output_channels[4], 128, 3, 1, 1),
-                    nn.ReLU(),
-                    nn.Conv2d(128, output_channels[5], 4, 2, 1),
-                    nn.ReLU(),
+                Sequential(
+                    Conv2d(output_channels[4], 128, kernel_size, stride, padding),
+                    ReLU(),
+                    Conv2d(128, output_channels[5], 2, 2, 0),
+                    ReLU(),
                 ),
             ]
         )
@@ -71,12 +71,12 @@ class BaselineModel(torch.nn.Module):
             out_features.append(feature)
 
         # Make sure output shapes are correct
-        self.verify_out_features(out_features)
+        self._verify_out_features(out_features)
 
         # Return output features as tuple
         return tuple(out_features)
 
-    def verify_out_features(self, out_features):
+    def _verify_out_features(self, out_features):
         for idx, feature in enumerate(out_features):
             out_channel = self.out_channels[idx]
             h, w = self.output_feature_shape[idx]

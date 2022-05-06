@@ -1,7 +1,7 @@
 import torch
-import tqdm
 import numpy as np
 import tops
+from tqdm import tqdm
 from pycocotools.cocoeval import COCOeval
 from pycocotools.coco import COCO
 from ssd import utils
@@ -25,7 +25,7 @@ def silent_evaluation(eval_object):
 def calculate_class_aps(coco_gt, coco_dt, label_map):
     out_stats = {}
 
-    print("---------------------------------------------------")
+    # print("---------------------------------------------------")
     for index, class_name in label_map.items():
         eval_object = COCOeval(coco_gt, coco_dt, iouType="bbox")
         eval_object.params.catIds = [index]
@@ -42,13 +42,13 @@ def calculate_class_aps(coco_gt, coco_dt, label_map):
             stat_key = f"AP_{class_name}"
             out_stats[stat_key] = ap_score
 
-        print(
-            "AP for class",
-            class_name,
-            "is",
-            f"{eval_object.stats[0]:.4f}",
-            extra_message,
-        )
+        # print(
+        #     "AP for class",
+        #     class_name,
+        #     "is",
+        #     f"{eval_object.stats[0]:.4f}",
+        #     extra_message,
+        # )
 
     return out_stats
 
@@ -66,7 +66,13 @@ def evaluate(
     """
     model.eval()
     ret = []
-    for batch in tqdm.tqdm(dataloader, desc="Evaluating on dataset"):
+
+    progress = tqdm(
+        dataloader,
+        desc=f"\t Evaluating: ",
+        bar_format="{desc} |{bar:30}| {elapsed} {n_fmt}/{total_fmt}",
+    )
+    for batch in progress:
         batch["image"] = tops.to_cuda(batch["image"])
         batch = gpu_transform(batch)
         with torch.cuda.amp.autocast(enabled=tops.AMP()):

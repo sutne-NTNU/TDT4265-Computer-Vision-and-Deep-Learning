@@ -30,10 +30,10 @@ from .baseline import (
 
 train_cpu_transform = L(torchvision.transforms.Compose)(
     transforms=[
-        # L(RandomSampleCrop)(),
+        L(RandomSampleCrop)(),
         L(ToTensor)(),
-        L(RandomHorizontalFlip)(),
-        L(ColorJitter)(brightness=0.2, contrast=0.1, saturation=0.1, hue=0.5),
+        L(RandomHorizontalFlip)(p=0.5),
+        L(ColorJitter)(brightness=0.1, contrast=0, saturation=0.1, hue=0.1),
         L(Resize)(imshape="${train.imshape}"),
         L(GroundTruthBoxesToAnchors)(anchors="${anchors}", iou_threshold=0.5),
     ]
