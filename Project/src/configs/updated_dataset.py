@@ -1,6 +1,7 @@
 from .utils import get_dataset_dir
 
-# Import everything from the old dataset and only change the dataset folder.
+# Import everything from the best model and only change the dataset folder.
+# This file is also used for the dataset exploration.
 from .task_2_4 import (
     train,
     optimizer,

@@ -29,38 +29,27 @@ anchors = L(AnchorBoxes)(
     scale_size_variance=0.2,
     # adjusted to fit dataset exploration results
     min_sizes=[
+        [4, 4],
+        [6, 6],
         [8, 8],
         [12, 12],
+        [24, 24],
         [32, 32],
         [48, 48],
         [64, 64],
         [128, 128],
-        [256, 300],
+        [256, 256],
     ],
     aspect_ratios=[
-        [4],
-        [3],
-        [2],
-        [1],
-        [6, 4],
-        [8, 4],
+        [4, 3, 2, 1],
+        [4, 3, 2, 1],
+        [4, 3, 2, 1],
+        [5, 4, 3, 2, 1],
+        [4, 3, 2, 1],
+        [3, 2, 1],
+        [3, 2, 1],
+        [2, 1],
+        [2, 1],
+        [2, 1],
     ],
-)
-
-# Remove data augmentation as it just made the model worse, and the updated dataset has enough variation
-train_cpu_transform = L(torchvision.transforms.Compose)(
-    transforms=[
-        L(ToTensor)(),
-        L(Resize)(imshape="${train.imshape}"),
-        L(GroundTruthBoxesToAnchors)(anchors="${anchors}", iou_threshold=0.5),
-    ]
-)
-
-model = L(SSD300)(
-    feature_extractor="${backbone}",
-    anchors="${anchors}",
-    loss_objective="${loss_objective}",
-    num_classes=8 + 1,
-    use_deep_heads=False,
-    use_improved_weight_init=True,
 )
