@@ -1,4 +1,4 @@
-import torchvision
+import torch
 
 from tops.config import LazyCall as L
 from ssd.data.transforms import ToTensor, GroundTruthBoxesToAnchors, Resize
@@ -21,35 +21,34 @@ from .task_2_3_4 import (
 )
 
 anchors = L(AnchorBoxes)(
-    # unchanged
-    image_shape="${train.imshape}",
+    # Unchanged
     feature_sizes=[[32, 256], [16, 128], [8, 64], [4, 32], [2, 16], [1, 8]],
     strides=[[4, 4], [8, 8], [16, 16], [32, 32], [64, 64], [128, 128]],
+    image_shape="${train.imshape}",
     scale_center_variance=0.1,
     scale_size_variance=0.2,
-    # adjusted to fit dataset exploration results
+    # Changed to better match results of dataset exploration
     min_sizes=[
-        [4, 4],
         [6, 6],
-        [8, 8],
-        [12, 12],
-        [24, 24],
+        [16, 16],
         [32, 32],
         [48, 48],
         [64, 64],
         [128, 128],
-        [256, 256],
+        [200, 200],
     ],
     aspect_ratios=[
-        [4, 3, 2, 1],
-        [4, 3, 2, 1],
-        [4, 3, 2, 1],
-        [5, 4, 3, 2, 1],
-        [4, 3, 2, 1],
-        [3, 2, 1],
-        [3, 2, 1],
-        [2, 1],
-        [2, 1],
-        [2, 1],
+        [2.0, 4.0],
+        [1.3, 2.0],
+        [1.3, 4.0],
+        [1.5, 2.0, 4.0],
+        [2.0, 3.0, 4.0],
+        [2.0, 3.0, 4.0],
     ],
+)
+
+
+optimizer = L(torch.optim.Adam)(
+    lr=0.0005,
+    weight_decay=0.0005,
 )

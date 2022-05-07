@@ -25,7 +25,6 @@ class SSD300(torch.nn.Module):
         self.loss_func = loss_objective
         self.num_classes = num_classes
         self.use_deep_heads = use_deep_heads
-        self.use_improved_weight_init = use_improved_weight_init
         self.regression_heads = []
         self.classification_heads = []
 
@@ -78,25 +77,19 @@ class SSD300(torch.nn.Module):
                     )
                 )
 
-        self.n_boxes_last = anchors.num_boxes_per_fmap[-1]
         self.regression_heads = ModuleList(self.regression_heads)
         self.classification_heads = ModuleList(self.classification_heads)
         self.anchor_encoder = AnchorEncoder(anchors)
-        self._init_weights()
+        self._init_weights(use_improved_weight_init)
 
-        self.regression_heads = ModuleList(self.regression_heads)
-        self.classification_heads = ModuleList(self.classification_heads)
-        self.anchor_encoder = AnchorEncoder(anchors)
-        self._init_weights()
-
-    def _init_weights(self):
+    def _init_weights(self, use_improved):
         layers = [*self.regression_heads, *self.classification_heads]
         for layer in layers:
             for param in layer.parameters():
                 if param.dim() > 1:
                     torch.nn.init.xavier_uniform_(param)
 
-        if self.use_improved_weight_init:
+        if use_improved:
             p = 0.99
             bias = np.log(p * (self.num_classes - 1) / (1 - p))
             self.classification_heads[-1][-1].bias.data.fill_(bias)

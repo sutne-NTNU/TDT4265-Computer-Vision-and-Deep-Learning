@@ -1,19 +1,20 @@
 from .utils import get_dataset_dir
 
-# Import everything from the best model and only change the dataset folder.
+# Import everything from the best model and only change the dataset
 # This file is also used for the dataset exploration.
 from .task_2_4 import (
     train,
-    optimizer,
-    schedulers,
+    anchors,
+    backbone,
     loss_objective,
     model,
-    backbone,
-    data_train,
-    data_val,
+    optimizer,
+    schedulers,
     train_cpu_transform,
     val_cpu_transform,
     gpu_transform,
+    data_train,
+    data_val,
     label_map,
 )
 

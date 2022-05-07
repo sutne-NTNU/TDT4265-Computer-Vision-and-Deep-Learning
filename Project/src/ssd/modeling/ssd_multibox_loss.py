@@ -29,12 +29,13 @@ def hard_negative_mining(loss, labels, neg_pos_ratio):
 
 
 def focal_loss(confs: torch.FloatTensor, gt_labels: torch.LongTensor):
-    num_classes = 8 + 1
+    num_classes = 8 + 1  # 8 classes + background
     gamma = 2
 
     y = torch.transpose(F.one_hot(gt_labels, num_classes=num_classes).float(), -1, -2)
-
-    alphas = torch.tensor([0.01, *[1 for _ in range(num_classes - 1)]]).cuda()
+    # background = 0.01, all others = 0.99
+    alphas = [0.01, *[0.99] * 8]
+    alphas = torch.tensor(alphas).cuda()
     alphas = alphas.repeat(confs.shape[2], 1).T
     weight = torch.pow(1.0 - F.softmax(confs, dim=1), gamma)
     focal = (

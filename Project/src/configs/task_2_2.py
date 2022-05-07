@@ -27,13 +27,13 @@ from .baseline import (
     label_map,
 )
 
-
+# mAP gets really bad with any big augmentation, so keeping it low for now
 train_cpu_transform = L(torchvision.transforms.Compose)(
     transforms=[
-        L(RandomSampleCrop)(),
+        # L(RandomSampleCrop)(),
         L(ToTensor)(),
-        L(RandomHorizontalFlip)(p=0.5),
-        L(ColorJitter)(brightness=0.1, contrast=0, saturation=0.1, hue=0.1),
+        L(RandomHorizontalFlip)(p=0.3),
+        # L(ColorJitter)(brightness=0.1, contrast=0, saturation=0.1, hue=0.1),
         L(Resize)(imshape="${train.imshape}"),
         L(GroundTruthBoxesToAnchors)(anchors="${anchors}", iou_threshold=0.5),
     ]
