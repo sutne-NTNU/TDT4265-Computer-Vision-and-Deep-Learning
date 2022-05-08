@@ -9,6 +9,6 @@ SETUP = -s
 	pandoc ${SETUP} -i $< ${PDVARS} -o $@ --template template.tex --pdf-engine=pdflatex
 
 create:
-	@make report.pdf
+	@make report.pdf && echo "Done"
 
 .PHONY: create
