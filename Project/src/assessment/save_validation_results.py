@@ -4,9 +4,11 @@ import tqdm
 import torch
 import json
 import tops
+import os
 from tops.config import instantiate
 from tops.checkpointer import load_checkpoint
 from ssd.utils import load_config, bbox_ltrb_to_ltwh
+from configs import get_output_dir
 
 
 @torch.no_grad()
@@ -59,6 +61,7 @@ def get_detections(config_path, save_path):
                     )
                 )
 
+    save_path = os.path.join(get_output_dir(), save_path)
     save_path.parent.mkdir(exist_ok=True, parents=True)
     with open(save_path, "w") as fp:
         json.dump(detections, fp)

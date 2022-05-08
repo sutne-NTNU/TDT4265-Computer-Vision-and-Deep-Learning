@@ -106,63 +106,41 @@ def create_comparison_image(batch, model, img_transform, label_map, score_thresh
     return concatinated_image
 
 
-def create_and_save_comparison_images(
-    dataloader, model, cfg, save_folder, score_threshold, num_images
-):
+def create_and_save_comparison_images(dataloader, model, cfg, save_folder):
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
 
     print("Saving images to", save_folder)
-
-    num_images_to_save = min(len(dataloader), num_images)
+    num_skips = 25  # only use every 25th image
+    num_images_to_save = len(dataloader) // num_skips
     dataloader = iter(dataloader)
 
     img_transform = instantiate(cfg.data_val.gpu_transform)
     for i in tqdm(range(num_images_to_save)):
         batch = next(dataloader)
+        for _ in range(num_skips - 1):
+            next(dataloader)
         comparison_image = create_comparison_image(
-            batch, model, img_transform, cfg.label_map, score_threshold
+            batch, model, img_transform, cfg.label_map, 0.3
         )
         filepath = create_filepath(save_folder, i)
         cv2.imwrite(filepath, comparison_image[:, :, ::-1])
 
 
-def get_save_folder_name(cfg, dataset_to_visualize):
-    return os.path.join(
-        get_image_dir(), "performance_assessment", cfg.run_name, dataset_to_visualize
-    )
+def get_save_folder_name(cfg):
+    return os.path.join(get_image_dir(), "comparison_images", cfg.run_name)
 
 
 @click.command()
 @click.argument("config_path")
-@click.option(
-    "--train", default=False, is_flag=True, help="Use the train dataset instead of val"
-)
-@click.option(
-    "-n", "--num_images", default=500, type=int, help="The max number of images to save"
-)
-@click.option(
-    "-c",
-    "--conf_threshold",
-    default=0.3,
-    type=float,
-    help="The confidence threshold for predictions",
-)
-def main(config_path, train, num_images, conf_threshold):
+def main(config_path):
     cfg = get_config(config_path)
     model = get_trained_model(cfg)
 
-    if train:
-        dataset_to_visualize = "train"
-    else:
-        dataset_to_visualize = "val"
+    dataloader = get_dataloader(cfg, "val")
+    save_folder = get_save_folder_name(cfg)
 
-    dataloader = get_dataloader(cfg, dataset_to_visualize)
-    save_folder = get_save_folder_name(cfg, dataset_to_visualize)
-
-    create_and_save_comparison_images(
-        dataloader, model, cfg, save_folder, conf_threshold, num_images
-    )
+    create_and_save_comparison_images(dataloader, model, cfg, save_folder)
 
 
 if __name__ == "__main__":
