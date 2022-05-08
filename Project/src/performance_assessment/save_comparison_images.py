@@ -10,6 +10,7 @@ from vizer.draw import draw_boxes
 from ssd import utils
 from tqdm import tqdm
 from ssd.data.transforms import ToTensor
+from configs.utils import get_image_dir
 
 
 def get_config(config_path):
@@ -127,7 +128,9 @@ def create_and_save_comparison_images(
 
 
 def get_save_folder_name(cfg, dataset_to_visualize):
-    return os.path.join("performance_assessment", cfg.run_name, dataset_to_visualize)
+    return os.path.join(
+        get_image_dir(), "performance_assessment", cfg.run_name, dataset_to_visualize
+    )
 
 
 @click.command()

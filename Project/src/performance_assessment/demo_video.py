@@ -3,6 +3,7 @@ import torch
 import tqdm
 import click
 import numpy as np
+import os
 import cv2
 import tops
 from ssd import utils
@@ -11,6 +12,7 @@ from PIL import Image
 from vizer.draw import draw_boxes
 from tops.checkpointer import load_checkpoint
 from pathlib import Path
+from configs.utils import get_video_dir
 
 
 @torch.no_grad()
@@ -18,13 +20,13 @@ from pathlib import Path
 @click.argument(
     "config_path", type=click.Path(exists=True, dir_okay=False, path_type=str)
 )
-@click.argument("video_path", type=click.Path(dir_okay=True, path_type=str))
-@click.argument("output_path", type=click.Path(dir_okay=True, path_type=str))
+@click.argument("video_name", type=click.Path(dir_okay=True, path_type=str))
+@click.argument("output_name", type=click.Path(dir_okay=True, path_type=str))
 @click.option(
     "-s", "--score_threshold", type=click.FloatRange(min=0, max=1), default=0.5
 )
 def run_demo(
-    config_path: str, score_threshold: float, video_path: str, output_path: str
+    config_path: str, score_threshold: float, video_name: str, output_name: str
 ):
     cfg = utils.load_config(config_path)
     model = tops.to_cuda(instantiate(cfg.model))
@@ -34,6 +36,9 @@ def run_demo(
     )
     model.load_state_dict(ckpt["model"])
     width, height = 1024, 128
+
+    video_path = os.path.join(get_video_dir(), video_name)
+    output_path = os.path.join(get_video_dir(), output_name)
 
     reader = cv2.VideoCapture(video_path)
     fourcc = cv2.VideoWriter_fourcc("M", "J", "P", "G")

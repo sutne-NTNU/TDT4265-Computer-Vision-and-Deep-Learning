@@ -9,7 +9,7 @@ from tops.checkpointer import load_checkpoint
 
 
 @torch.no_grad()
-def evaluation(cfg, N_images: int):
+def evaluation(cfg, num_batches: int):
     model = instantiate(cfg.model)
     model.eval()
     model = tops.to_cuda(model)
@@ -23,18 +23,30 @@ def evaluation(cfg, N_images: int):
     batch = tops.to_cuda(batch)
     batch = gpu_transform(batch)
     images = batch["image"]
-    imshape = list(images.shape[2:])
+    batch_size = int(images.shape[0])
+    image_channels = int(images.shape[1])
+    image_shape = tuple(images.shape[2:])
+
     # warmup
-    print("Checking runtime for image shape:", imshape)
-    for i in range(10):
+    for _ in range(10):
         model(images)
+    # Measure Time
     start_time = time.time()
-    for i in range(N_images):
-        outputs = model(images)
+    for _ in range(num_batches):
+        model(images)
     total_time = time.time() - start_time
-    print("Runtime for image shape:", imshape)
-    print("Total runtime:", total_time)
-    print("FPS:", N_images / total_time)
+
+    time_per_batch = total_time / num_batches
+    bps = 1 / time_per_batch
+    time_per_image = total_time / (batch_size * num_batches)
+    fps = 1 / time_per_image
+
+    print(
+        f"""Runtime Analysis for images with shape={image_shape}, batch size={batch_size}: 
+        Total Time={total_time:.2f} seconds ({num_batches} Batches)
+        Batch Time={(1000*time_per_batch):.2f} milliseconds, BPS={bps:.2f}
+        Image Time={(1000*time_per_image):.2f} milliseconds, FPS={fps:.2f}"""
+    )
 
 
 @click.command()

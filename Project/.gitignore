@@ -1,7 +1,10 @@
 # Folders
 *.vscode/
 *__pycache__/
-*outputs/
+outputs/*
+!outputs/images/
+!outputs/videos/
+!outputs/plots/
 
 # Filetypes
 

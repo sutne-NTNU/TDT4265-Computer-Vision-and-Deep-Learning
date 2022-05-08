@@ -20,8 +20,12 @@ def get_output_dir():
 
 
 def get_image_dir():
-    return pathlib.Path("../images")
+    return pathlib.Path.joinpath(get_output_dir(), "images")
 
 
 def get_plot_dir():
-    return pathlib.Path("../plots")
+    return pathlib.Path.joinpath(get_output_dir(), "plots")
+
+
+def get_video_dir():
+    return pathlib.Path.joinpath(get_output_dir(), "videos")
