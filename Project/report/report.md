@@ -92,12 +92,19 @@ The complete model is shown in [@tbl:model-baseline] and the hyperparameters use
 
 
 
+
+
+
 ## Augmenting the Data
 
 
 
-
-
+|                        | Images per Second |
+|:-----------------------|------------------:|
+| Normal                 |             26.69 |
+| With Data Augmentation |            131.51 |
+: Data Loading Benchmark before and after adding Data Augmentation.
+{#tbl:runtime}
 
 
 
@@ -142,6 +149,31 @@ We see that my model achieves a mAP of 0.898.
 
 \setcounter{subsection}{1}
 <!-- ## Quantitative Analysis -->
+
+
+| Model for Task | Number of Parameters |
+|:---------------|---------------------:|
+| Baseline       |            2 852 640 |
+| Task 2.3.1     |                    0 |
+| Task 2.3.2     |                    0 |
+| Task 2.3.3     |                    0 |
+| Task 2.3.4     |                    0 |
+| Task 2.4       |                    0 |
+: Number of paramters for all models
+{#tbl:num_params}
+
+| Model for Task | Batch Time (milliseconds) |  BPS | Image Time (milliseconds) |    FPS |
+|:---------------|--------------------------:|-----:|--------------------------:|-------:|
+| Baseline       |                    130.88 | 7.64 |                      4.09 | 244.50 |
+| Task 2.2       |                    131.51 | 7.60 |                      4.11 | 243.33 |
+| Task 2.3.1     |                    277.73 | 3.60 |                      8.68 | 115.22 |
+| Task 2.3.2     |                    278.90 | 3.59 |                      8.72 | 114.74 |
+| Task 2.3.3     |                    396.11 | 2.52 |                     12.38 |  80.78 |
+| Task 2.3.4     |                    396.03 | 2.52 |                     12.38 |  80.80 |
+| Task 2.4       |                    395.47 | 2.53 |                     12.36 |  80.92 |
+: Runtime Analysis for all models
+{#tbl:runtime}
+
 
 ## Discussion and Qualitative Analysis
 
