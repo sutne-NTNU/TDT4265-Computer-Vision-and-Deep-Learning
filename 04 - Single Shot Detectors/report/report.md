@@ -1,15 +1,11 @@
 ---
-figPrefix: Figure
-tblPrefix: Table
-numbersections: false
-toc: true
-date: \today
-title: Assignment 4 - Report
-subtitle: TDT4265 Computer Vision and Deep Learning
-author: Sivert Utne
-header-includes: |
-    \fancyhead[l]{TDT4265\\\textbf{Computer Vision and Deep Learning}}
-    \fancyhead[r]{Assignment 4\\\textbf{Sivert Utne}}
+template: assignment.tex
+subjectcode: TDT4265
+subjectname: Computer Vision and Deep Learning
+assignment: 4
+sec-num-depth: 0
+title: Single Shot Detectors
+date: April 21, 2022
 ---
 
 [1]: https://jonathan-hui.medium.com/ssd-object-detection-single-shot-multibox-detector-for-real-time-processing-9bd8deac0e06 "SSD Blog Post by Jonathan Hui"

@@ -1,50 +1,23 @@
 ---
-lang: en-US 
-papersize: a4 
-geometry: margin=3cm 
-numbersections: true
-colorlinks: true
-links-as-notes: true
-toc: true
-toc-depth: 3
-toc-title: Contents
-figPrefix: Figure
-tblPrefix: Table
-eqnPrefix: Equation
-title: Assignment 3 - Report
-author: Sivert Utne
-date: \today
-header-includes: |
-    \AtBeginDocument{\floatplacement{figure}{H}}
-    \AtBeginDocument{\floatplacement{codelisting}{H}}
-    \usepackage{lastpage}
-    \usepackage{cancel}
-    \usepackage{listings}
-    \usepackage{bm}
-    \usepackage{fancyhdr}
-    \pagestyle{fancy}
-    \renewcommand{\headrulewidth}{0.1px}
-    \renewcommand{\footrulewidth}{0.1px}
-    \fancyfoot[c]{Page \thepage\ of \pageref{LastPage}}
-    \fancyhead[l]{TDT4265\\\textbf{Computer Vision and Deep Learning}}
-    \fancyhead[c]{}
-    \fancyhead[r]{Assignment 3\\\textbf{Sivert Utne}}
+template: assignment.tex
+subjectcode: TDT4265
+subjectname: Computer Vision and Deep Learning
+assignment: 3
+sec-num-depth: 0
+title: Convolutional Neural Networks
+date: March 4, 2022
 ---
-\clearpage
 
 
+# Task 1 
 
-
-
-# Task 1 {-}
-
-## (a) {-}
+## (a)
 
 The convolution is visualized in [@fig:task1a], the multiplications and additions are not written out. The explanation part visualizes with colors how the values from the flipped kernel, and the respective area in the original image is multiplied and then summed together.
 
 ![Convolution on an image with a sobel-kernel. All "pixels" outside the image are counted as 0. The resulting image is shown in the top-right corner](images/convolution.png){#fig:task1a}
 
-## (b) {-}
+## (b)
 
 Out of the following:
 
@@ -55,7 +28,7 @@ Out of the following:
 **(iii) Max Pooling** is the one that reduces the sensitivity to small translational variations in the output. This is because maxpooling will take the highest value of a range and return that as the new value, meaning with a MaxPooling kernel of size $3\times3$, if the highest value pixel in the image was located at the leftmost pixel of a kernel, and it was moved 2 pixels to the right, the output of that maxpooling kernel will be exactly the same. The same logic applies in all translational directions (up, down, left, right).
 
 \clearpage
-## (c) {-}
+## (c)
 
 We have:
 $$\begin{aligned}
@@ -87,7 +60,7 @@ $$\begin{aligned}
 We see that we should use a padding of $P_H\times P_W=\underline{\underline{2\times2}}$.
 
 \clearpage
-## (d) {-}
+## (d)
 
 We know that:
 $$\begin{aligned}
@@ -126,7 +99,7 @@ $$\begin{aligned}
 In other words, we get a kernel size in layer 1 of $F_H \times F_W = \underline{\underline{\bm{9} \times \bm{9}}}$
 
 \clearpage
-## (e) {-}
+## (e)
 
 We have that:
 
@@ -147,7 +120,7 @@ $$\begin{aligned}
     \bm{252}&\times\bm{252}\\
 \end{aligned}$$
 
-## (f) {-}
+## (f)
 
 We have that:
 
@@ -169,7 +142,7 @@ $$\begin{aligned}
 \end{aligned}$$
 
 \clearpage
-## (g) {-}
+## (g)
 
 
 The image has dimensions $32\times32$ and is RGB ($32\times32\times3$). Using the network outlined in [@tbl:task2model] we get the following number of parameters for each layer:
@@ -191,7 +164,7 @@ We see that the network has a total of **390 410** parameters.
 
 
 \clearpage
-# Task 2 {-}
+# Task 2
 
 \begin{table}[H]
     \centering
@@ -224,12 +197,12 @@ We see that the network has a total of **390 410** parameters.
 : Hyperparameters for Model in Task 2.
 {#tbl:task2}
 
-## (a)  {-}
+## (a)
 
 ![Training + Validation Loss and Validation Accuracy for CNN Model described in [@tbl:task2model].](../results/task2.png){#fig:task2a}
 
 \clearpage
-## (b)  {-}
+## (b)
 
 The final accuracies of the model[^1] is written in [@fig:task2a], and is also stated in [@tbl:task2b].
 
@@ -244,11 +217,11 @@ The final accuracies of the model[^1] is written in [@fig:task2a], and is also s
 {#tbl:task2b}
 
 \clearpage
-# Task 3 {-}
+# Task 3
 
-## (a) {-}
+## (a)
 
-### Model 1 {-}
+### Model 1
 
 The first model is an exact replica of the model from [@tbl:task2model]. The only differences are listed in [@tbl:task3aModel1].
 
@@ -262,7 +235,7 @@ The first model is an exact replica of the model from [@tbl:task2model]. The onl
 ![Training and Validation Loss + Training Accuracy for Model 1](../results/task3a-model1.png){#fig:task3a1}
 
 
-### Model 2 {-}
+### Model 2
 
 For my second model i wanted to increase the models complexity by adding more layers. In doing this i increased the learning rate to speed up the learning while also adding Dropout to two of the layers to ''force'' the model to generalize. The Complete network is described in [@tbl:task3model2] and hyperparamters are listed in [@tbl:task3aModel2].
 
@@ -301,7 +274,7 @@ For my second model i wanted to increase the models complexity by adding more la
 ![Training and Validation Loss + Training Accuracy for Model 2](../results/task3a-model2.png){#fig:task3a2}
 
 
-## (b) {-}
+## (b)
 
 The final results for the two models are listen in [@tbl:task3b]:
 
@@ -316,7 +289,7 @@ The final results for the two models are listen in [@tbl:task3b]:
 From the table we that **Model 2** has the best results. Its training and validation loss, along with its validation accuracy is plotted in [@fig:task3a2].
 
 
-## (c) {-}
+## (c)
 
 I believe i got quite lucky with the improvements i wanted to test in such that the first things i tried worked well enough that i managed to squeeze them over 75% test accuracy. But that being said to get it over 80% in Task 3e i tried a few more improvements and here is the general impression i have of the positive effects of each of them (keeping in mind that too much of any of them can slo lead to negative effect, but using each of them in fitting amounts should give the effects listed):
 
@@ -331,7 +304,7 @@ I believe i got quite lucky with the improvements i wanted to test in such that 
 | Batch Normalization            | Faster Training                                 |
 
 
-## (d) {-}
+## (d)
 
 Based on the limited experimentation i performed before both models were above 75% i found the biggest improvement after adding Dropout to Model 2.
 
@@ -339,7 +312,7 @@ Based on the limited experimentation i performed before both models were above 7
 
 As we can see the model overfits much less and is able to achieve far better generalization.
 
-## (e) {-}
+## (e)
 
 After some more experimentation with improvements i ended up with this model:
 
@@ -393,14 +366,14 @@ The results of the model are seen in [@fig:task3e].
 ![My Final Models Train and Validation Loss, along with its validation Accuracy. Test Accuracy is stated in lower right corner.](../results/task3e.png){#fig:task3e}
 
 
-## (f) {-}
+## (f)
 
 As we can see from the train and validation loss in [@fig:task3e], the validation and training loss are pretty much equal at all times, this means the model doesn't show any signs of over/under-fitting. The model would be underfitting if the validation loss failed to keep up with the training loss, and overfitting if the validation loss had started to increase as the model overfits to the training data. This is also backed up by how the model has almost equal training and test accuracy.
 
 \clearpage
-# Task 4 {-}
+# Task 4
 
-## (a) {-}
+## (a)
 
 ![Training + Validation Loss and Validation Accuracy for ResNet18 Model. The Test Accuracy for the model with lowest validaton loss is listed in the bottom right.](../results/Task4a.png){#fig:task4a}
 
@@ -421,7 +394,7 @@ The following transformationa were also applied to the images:
   - mean      $=(0.485, 0.456, 0.406)$
   - std \quad $=(0.229, 0.224, 0.225)$
 
-## (b) {-}
+## (b)
 
 ![zebra.jpg](../images/zebra.jpg){width=30%}
 
@@ -437,7 +410,7 @@ In [@fig:task4b] we see how the filters extract different features in the image.
 |     49 | Diagonal Lines (Down to the right) | Stripes and edges of the Zebra |
 |     52 | Green Color                        | The Grass (yellow=green+red)   |
 
-## (c) {-}
+## (c)
 
 ![Visualization of activations in ResNet18 on "zebra.jpg" after passing through all but the last two convolutional layers. This is done for activations with indices 0-9](../results/Task4c.png){#fig:task4c}
 

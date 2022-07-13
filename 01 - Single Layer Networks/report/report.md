@@ -1,32 +1,11 @@
 ---
-title: Assignment 1 - Report
-author: Sivert Utne
-date: \today
-lang: en-US
-papersize: a4
-geometry: margin=4cm
-numbersections: true
-colorlinks: true
-links-as-notes: true
-toc: true
-toc-depth: 3
-toc-title: "Contents"
-figPrefix: "Figure"
-tblPrefix: "Table"
-eqnPrefix: "Equation"
-header-includes: |
-    \AtBeginDocument{\floatplacement{figure}{H}}
-    \AtBeginDocument{\floatplacement{codelisting}{H}}
-    \usepackage{lastpage}
-    \usepackage{cancel}
-    \usepackage{listings}
-    \usepackage{bm}
-    \usepackage{fancyhdr}
-    \pagestyle{fancy}
-    \fancyfoot[c]{Page \thepage\ of \pageref{LastPage}}
-    \fancyhead[l]{TDT4265\\\textbf{Computer Vision and Deep Learning}}
-    \fancyhead[c]{}
-    \fancyhead[r]{Assignment 1\\\textbf{Sivert Utne}}
+template: assignment.tex
+subjectcode: TDT4265
+subjectname: Computer Vision and Deep Learning
+assignment: 1
+sec-num-depth: 0
+title: Single Layer Networks
+date: February 3, 2022
 ---
 
 
@@ -34,11 +13,11 @@ header-includes: |
 
 
 \clearpage
-# Task 1 {-}
+# Task 1
 
 
 
-## (a) {-}
+## (a)
 
 We start with the following known equation:
 $$\begin{aligned}
@@ -82,7 +61,7 @@ $$\begin{aligned}
 
 
 
-## (b) {-}
+## (b)
 
 We have the cross-entropy cost function for multiple classes defined as:
 $$
@@ -117,17 +96,17 @@ $$\begin{aligned}
 
 
 \clearpage
-# Task 2 {-}
+# Task 2
 
-## (b) {-}
+## (b)
 
 ![Training and Validation Loss for Binary Model](../results/task2b_binary_train_loss.png){width=80%}
 
-## (c) {-}
+## (c)
 
 ![Training and Validation Accuracy for Binary Model](../results/task2c_binary_train_accuracy.png){width=80%}
 
-## (d) {-}
+## (d)
 
 When we use the condition specified of passing through 20% of the dataset 10 times without seeing an improvement (the validation loss is higher than the lowest measured 10 times in a row), the **Early stopping happens after 33 Epochs**. And from the output:
 
@@ -141,7 +120,7 @@ Validation accuracy: 0.9794319294809011
 
 We see that it achieved a train accuracy of 97.6% and a validation accuracy of 97,9%.
 
-## (e) {-}
+## (e)
 
 
 ![Validation Accuracy With and Without Shuffling Batches](../results/task2e_train_accuracy_shuffle_difference.png){#fig:2e1 width=80%}
@@ -164,17 +143,17 @@ We see that it achieved a train accuracy of 97.4% and a validation accuracy of 9
 ![Loss With And Without Shuffling Batches](../results/task2e_train_loss_with_shuffle.png){#fig:2e2 width=80%}
 
 \clearpage
-# Task 3 {-}
+# Task 3
 
-## (b) {-}
+## (b)
 
 ![Training and Validation Loss for Multi-Class Model](../results/task3b_softmax_train_loss.png){#fig:3b width=80%}
 
-## (c) {-}
+## (c)
 
 ![Training and Validation Accuracy for Multi-Class Model](../results/task3c_softmax_train_accuracy.png){#fig:3c width=80%}
 
-## (d) {-}
+## (d)
 
 In [@fig:3c] we see early signs of overfitting.
 
@@ -186,8 +165,8 @@ From [@fig:3c] we see how the training and validation accuracy start to diverge 
 
 
 \clearpage
-# Task 4 {-}
-## (a) {-}
+# Task 4
+## (a)
 We have that
 
 $$\begin{aligned}
@@ -209,21 +188,21 @@ $$\begin{aligned}
 &=\underline{\underline{\bm{-x_j^n(y_k^n-\hat{y}_k^n)+2\lambda w}}}\\
 \end{aligned}$$
 
-## (b) {-}
+## (b)
 
 ![Visualization of weights after training models with $\lambda=0.0$ (top), and $\lambda=2.0$ (bottom).](../results/task4b_model_weights.png){#fig:4b width=100%}
 
 From [@fig:4b] we see that the model with regularization (bottom) is a lot less noisy then the one without it. This happens because the regularization prevents the model from getting too complex by reducing the cost function. In essence this means that a model with high regularization will prevent overfitting because the model will struggle to learn more complex features. From the figure we see how the model without regularization starts to become a blurry mess as it is trying to learn what the numbers look like based on very specific pixels in the training data, instead of generalizing.
 
-## (c) {-}
+## (c)
 
 ![Validation Accuracy for models with different $\lambda$ values.](../results/task4c_l2_validation_accuracy.png){#fig:4c width=95%}
 
-## (d) {-}
+## (d)
 
 [@fig:4c] shows us how the validation accuracy degrades when applying more regularization. The reason for this is that although regularization can prevent overfitting, having too much regularization can produce underfitting, where the model will be too simple to be able to learn the features necessary. We see this as the model with $\lambda=2$ is not able to learn much other than the major differences between the digits and instead has a wildly fluctuating accuracy simply based on luck.
 
-## (e) {-}
+## (e)
 
 ![Length ($L_2$ norm, $||w||^2$) of weight vectors for models with different $\lambda$ values.](../results/task4e_l2_vector_lengths.png){#fig:4e width=95%}
 

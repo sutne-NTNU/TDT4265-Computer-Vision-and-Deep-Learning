@@ -1,43 +1,20 @@
 ---
-lang: en-US 
-papersize: a4 
-geometry: margin=3cm 
-numbersections: true
-colorlinks: true
-links-as-notes: true
-toc: true
-toc-depth: 3
-toc-title: Contents
-figPrefix: Figure
-tblPrefix: Table
-eqnPrefix: Equation
-title: Assignment 2 - Report
-author: Sivert Utne
-date: \today
-header-includes: |
-    \AtBeginDocument{\floatplacement{figure}{H}}
-    \AtBeginDocument{\floatplacement{codelisting}{H}}
-    \usepackage{lastpage}
-    \usepackage{cancel}
-    \usepackage{listings}
-    \usepackage{bm}
-    \usepackage{fancyhdr}
-    \pagestyle{fancy}
-    \renewcommand{\headrulewidth}{0.1px}
-    \renewcommand{\footrulewidth}{0.1px}
-    \fancyfoot[c]{Page \thepage\ of \pageref{LastPage}}
-    \fancyhead[l]{TDT4265\\\textbf{Computer Vision and Deep Learning}}
-    \fancyhead[c]{}
-    \fancyhead[r]{Assignment 2\\\textbf{Sivert Utne}}
+template: assignment.tex
+subjectcode: TDT4265
+subjectname: Computer Vision and Deep Learning
+assignment: 2
+sec-num-depth: 0
+title: Multi Layer Networks
+date: February 18, 2022
 ---
 
 
 
 
 \clearpage
-# Task 1 {-}
+# Task 1
 
-## (a) {-}
+## (a)
 
 We will be using the following definitions and equations:
 $$\begin{aligned}
@@ -67,7 +44,7 @@ $$\begin{aligned}
     &=\underline{\underline{f'(z_j)\sum_k w_{kj}\delta_k}}
 \end{aligned}$$
 
-## (b) {-}
+## (b)
 
 Now i must admit that i kind of forgot that i skipped this task as i didn't quite understand what it asked for, so due to time constraints lets just assume that the correct answer is written in white below:
 
@@ -75,9 +52,9 @@ Now i must admit that i kind of forgot that i skipped this task as i didn't quit
 
 
 \clearpage
-# Task 2 {-}
+# Task 2
 
-## (a) {-}
+## (a)
 
 Using all images from the training dataset (60 000 images) to find the mean pixel value and standard deviation gives:
 
@@ -89,7 +66,7 @@ standard deviation = 78.56748998339798
 The calculation and the pre processing is implemented in the file  **task2ab.py**.
 
 
-## (c) {-}
+## (c)
 
 ![Training and Validation Loss and Accuracy for a model with 1 Hidden layer with 64 Neurons](../results/task2c.png){#fig:task2c}
 
@@ -98,7 +75,7 @@ The calculation and the pre processing is implemented in the file  **task2ab.py*
 | Hidden Layer With 64 Nodes | 0.0765     | 0.2978          | 98.370%        | 91.520%             |
 : Final Results {#tbl:task2c}
 
-## (d) {-}
+## (d)
 
 To find the total number of parameters in the network from Task 2c we simply add the number of biases and weights for each layer together.
 
@@ -111,7 +88,7 @@ $$\begin{aligned}
 
 
 \clearpage
-# Task 3 {-}
+# Task 3
 
 All subtasks are implemented in the files **task2ab.py**, **task2c.py** and **task3.py**. All the models have been placed in the same figures for easy and compact comparison.
 
@@ -138,19 +115,19 @@ The results are shown in [@fig:task3l] and [@fig:task3a]. When applying the ''Tr
 
 As stated all subtasks and improvements are against the base model (blue, No Improvements).
 
-## (a) {-}
+## (a)
 
 We notice how the model with improved weight initialization (yellow) drastically improves the models loss and accuracy, as well as its learning speed (how fast the results improve). We see how the loss of the model even converges, unlike the base model that, although the loss is decreasing, has a high loss variance ([@fig:task3l]). When comparing the training and validation accuracy ([@fig:task3a]) as well, we see how this model is able to achieve almost 100% on the training data, while also getting a much higher score on the validation data.
 
 This means the improved weight initialization greatly improves the models generalization.
 
-## (b) {-}
+## (b)
 
 The model with improved sigmoid (green) gives both reduced and quickly decreasing loss during training ([@fig:task3l]), and a slightly faster learning speed ([@fig:task3a]). We notice however how this addition makes the model prone to overfitting, as we see how the validation loss starts to increase again after 5000 training steps, even while the training loss is steadily decreasing ([@fig:task3l]). This then affects the validation accuracy and we see how it actually ends up lower than for the base model ([@fig:task3a]). This could however be remedied by combining the improved sigmoid with the improved weight initialization where the risk of overfitting will be reduced by the improved generalization of the improved weights.
 
 This improvement is the one that reduces the training time the most, stopping after only 14 000 training steps, compared to the base models 30 000. As such it is a useful tool as long as one is aware of the overfitting risk.
 
-## (c) {-}
+## (c)
 
 The results of the model that uses momentum (red), is almost exactly the same as they were without momentum (in terms of the final results in [@tbl:task3]). This means that momentum does not effect the final accuracy or loss of the model much. However what it does do, is greatly increase the learning speed and convergence speed of the model. We see this in how the graphs are much steeper, and end sooner than for the base model (early stopping after 17 500 steps).
 
@@ -165,7 +142,7 @@ In other words, momentum allows us to get the ''same results'' faster.
 
 
 \clearpage
-# Task 4 {-}
+# Task 4
 
 Lets start by plotting all the different models in the same figures to more easily compare them against eachother. The results are shown in [@fig:task4l] and [@fig:task4a]. As stated in the assignment all the models will apply all of the ''Tricks of the Trade'' from Task 3.
 
@@ -186,17 +163,17 @@ The different subtasks will refer to these figures for their respective comparis
 
 Once again all subtasks will be compared to the base model (blue) with a single hidden layer with 64 neurons.
 
-## (a) {-}
+## (a)
 
 The model with half the neurons in the hidden layer (yellow) struggles with the complexity of the problem. We see that it starts overfitting to the training data quite quickly ([@fig:task4l]) as it doesn't have enough parameters to allow it to be generalized. We also see the effects of this in [@fig:task4a] where the validation accuracy quickly flattens out, while the training accuracy increases.
 
 
-## (b) {-}
+## (b)
 
 The model with (128) twice the amount of neurons (green) seems to learn at almost the same rate as the base model, we see how the training loss/accuracy are almost equal, however the increased complexity of this model allows it to generalize better, and because of that its validation accuracy is higher, and loss is lower than that of the base model ([@fig:task4a]).
 
 
-## (d) {-}
+## (d)
 
 To find the number of neurons in the hidden layers, using that both hidden layers had to have the same amount of neurons, i ended up with 60 neurons in each hidden layer because:
 
@@ -214,6 +191,6 @@ This is the closest we can get to the model used in Task 3c (same number of para
 
 Since the model with 2 hidden layers (red) has almost the same amount of parameters we would expect it to be not too different than that of the base model. And based on the graphs we can see that the models do infact behave quite similarly, however the model with 2 layers is actually able to be more generalized than the model with a single layer. we see this from [@fig:task4a] where the double layer model spends longer to get a perfect score for the training data, while also getting an increased score on the validation data.
 
-## (e) {-}
+## (e)
 
 Finally the model with 10 hidden layers with 64 neurons each (purple) takes quite a while longer to train than the other models ($4s/epoch$ compared to $\approx1s/epoch$), it also required a lot more epochs before converging and early stopping kicking in. This model is wildly overfitting, it doesn't look that bad but that is due to the fact that it has so many parameters that it takes a while for changes to occur, but we see how the validation loss starts to increase ([@fig:task4l]) and the validation accuracy ([@fig:task4a]) plateaus at the same level as the model with only 32 neurons. It also has major dips/spikes indicating that model is quite sensitive due to the variance in loss being quite high.

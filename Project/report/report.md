@@ -1,15 +1,10 @@
 ---
-figPrefix: Figure
-tblPrefix: Table
-numbersections: true
-toc: true
-date: \today
-title: Project Report
-subtitle: TDT4265 Computer Vision and Deep Learning
-author: Sivert Utne
-header-includes: |
-    \fancyhead[l]{TDT4265\\\textbf{Computer Vision and Deep Learning}}
-    \fancyhead[r]{Project Report\\\textbf{Sivert Utne}}
+template: report.tex
+subjectcode: TDT4265
+subjectname: Computer Vision and Deep Learning
+supertitle: Project Report
+title: Convolutional Neural Networks
+date: May 8, 2022
 ---
 
 # General Information {-}
