@@ -3,7 +3,7 @@ template: report.tex
 subjectcode: TDT4265
 subjectname: Computer Vision and Deep Learning
 supertitle: Project Report
-title: Convolutional Neural Networks
+title: Object Recognition in Lidar Images from Car
 date: May 8, 2022
 ---
 
