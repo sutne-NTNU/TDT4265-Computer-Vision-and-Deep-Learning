@@ -1,4 +1,4 @@
-# TDT4265 Project
+# [TDT4265 Project](report/report.pdf)
 
 To run any of the tasks, first make sure you have installed all dependencies with:
 ```sh
